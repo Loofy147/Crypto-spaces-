@@ -67,3 +67,30 @@ def test_pre_trade_risk_engine() -> None:
 
     assert res.passed is False
     assert any("Concentration cap breached" in v for v in res.violations)
+
+
+def test_pre_trade_margin_coverage_checks() -> None:
+    risk_engine = PreTradeRiskEngine(min_margin_coverage=1.25)
+    state = PortfolioState(
+        timestamp=0.0,
+        cash_balance=10000.0,
+        positions={},
+    )
+    categories = {"BTC": AssetCategory.CORE}
+
+    # Low collateral relative to required margin
+    res_failed = risk_engine.validate_pre_trade(
+        state=state,
+        proposed_weights={"BTC": 1.0},
+        asset_categories=categories,
+        required_margin=10000.0,  # Effective collateral 10k -> coverage 1.0 < 1.25
+    )
+    assert res_failed.passed is False
+    assert any("Liquidation risk" in v for v in res_failed.violations)
+
+
+def test_smart_router_zero_trade_notional() -> None:
+    router = SmartOrderRouter()
+    est = router.estimate_trade_cost("BTC", 0.0, 100000.0)
+    assert est.total_execution_cost == 0.0
+    assert est.is_cost_effective is True

@@ -37,6 +37,7 @@ def run_3year_simulation() -> None:
     btc_price = 30000.0
     eth_price = 2000.0
     sol_price = 50.0
+    avax_price = 20.0
 
     btc_returns = []
 
@@ -46,18 +47,20 @@ def run_3year_simulation() -> None:
         btc_ret = float(np.random.normal(0.0008, 0.025))
         eth_ret = float(btc_ret * 1.2 + np.random.normal(0.0, 0.01))
         sol_ret = float(btc_ret * 1.5 + np.random.normal(0.0, 0.02))
+        avax_ret = float(btc_ret * 1.4 + np.random.normal(0.0, 0.02))
 
         btc_returns.append(btc_ret)
 
         btc_price *= 1.0 + btc_ret
         eth_price *= 1.0 + eth_ret
         sol_price *= 1.0 + sol_ret
+        avax_price *= 1.0 + avax_ret
 
         events.append(
             MarketTickEvent(
                 event_id=f"tick_btc_{day}",
                 timestamp=ts,
-                sequence=day * 4,
+                sequence=day * 5,
                 symbol="BTC",
                 price=btc_price,
             )
@@ -66,7 +69,7 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_eth_{day}",
                 timestamp=ts,
-                sequence=day * 4 + 1,
+                sequence=day * 5 + 1,
                 symbol="ETH",
                 price=eth_price,
             )
@@ -75,9 +78,18 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_sol_{day}",
                 timestamp=ts,
-                sequence=day * 4 + 2,
+                sequence=day * 5 + 2,
                 symbol="SOL",
                 price=sol_price,
+            )
+        )
+        events.append(
+            MarketTickEvent(
+                event_id=f"tick_avax_{day}",
+                timestamp=ts,
+                sequence=day * 5 + 3,
+                symbol="AVAX",
+                price=avax_price,
             )
         )
 
@@ -87,7 +99,7 @@ def run_3year_simulation() -> None:
             YieldAccruedEvent(
                 event_id=f"yield_{day}",
                 timestamp=ts,
-                sequence=day * 4 + 3,
+                sequence=day * 5 + 4,
                 asset_symbol="BUIDL",
                 amount=daily_yield,
                 apy_rate=0.045,
@@ -107,15 +119,16 @@ def run_3year_simulation() -> None:
     print(f"Sharpe Ratio:                {summary.sharpe_ratio:.2f}")
     print(f"Max Drawdown:                {summary.max_drawdown_pct:.2f}%")
 
-    # 2. Run CPCV Partitioning
+    # 2. Run CPCV Partitioning using Portfolio Strategy Returns
     print("\nExecuting Combinatorial Purged Cross-Validation (CPCV)...")
+    strat_returns = summary.daily_returns if summary.daily_returns else btc_returns
     cpcv = CombinatorialPurgedCrossValidation(n_splits=6, k_test_splits=2, purge_window=5, embargo_window=5)
-    splits = cpcv.generate_splits(num_days)
+    splits = cpcv.generate_splits(len(strat_returns))
     print(f"Generated {len(splits)} CPCV path combinations with purging and embargoing.")
 
     path_sharpes = []
     for split in splits:
-        test_rets = [btc_returns[i] for i in split.test_indices if i < len(btc_returns)]
+        test_rets = [strat_returns[i] for i in split.test_indices if i < len(strat_returns)]
         if len(test_rets) > 5:
             arr = np.array(test_rets)
             m_r = float(np.mean(arr))
@@ -128,11 +141,15 @@ def run_3year_simulation() -> None:
 
     # 3. Compute Deflated Sharpe Ratio (DSR) & PBO
     print("\nCalculating Deflated Sharpe Ratio (DSR) & PBO...")
+    trial_sharpes = [summary.sharpe_ratio]  # Single selected production strategy trial
     dsr_res = DeflatedSharpeRatioCalculator.calculate_dsr(
-        returns=btc_returns,
-        all_trial_sharpes=path_sharpes,
+        returns=strat_returns,
+        all_trial_sharpes=trial_sharpes,
         annualization_factor=365.0,
     )
+    # Update pbo score from CPCV path distribution
+    pbo_val = float(np.mean([1.0 if sh <= 0 else 0.0 for sh in path_sharpes]))
+    dsr_res = dsr_res.model_copy(update={"pbo_score": pbo_val, "is_valid": dsr_res.dsr_score >= 0.95 and pbo_val < 0.10})
 
     print(f"Estimated Strategy Sharpe:   {dsr_res.estimated_sharpe:.2f}")
     print(f"Benchmark Sharpe (SR*):      {dsr_res.benchmark_sharpe_star:.2f}")
