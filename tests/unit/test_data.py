@@ -86,3 +86,53 @@ def test_altcoin_season_index() -> None:
     asi_bear = OnChainIndicatorsCalculator.calculate_altcoin_season_index(0.1, alt_rets_bear)
     assert asi_bear.asi_score == 0.0
     assert asi_bear.regime == ASIRegime.BITCOIN_DOMINANCE
+
+
+def test_onchain_metrics_edge_cases() -> None:
+    # Zero market cap / zero realized cap
+    m = OnChainIndicatorsCalculator.calculate_onchain_metrics(
+        market_cap=0.0,
+        realized_cap=100.0,
+        prev_realized_cap_30d=0.0,
+        hot_capital_val=10.0,
+    )
+    assert m.nupl == 0.0
+    assert m.realized_cap_change_pct == 0.0
+    assert m.hot_capital_share == 0.0
+
+    # Normal positive inputs
+    m_valid = OnChainIndicatorsCalculator.calculate_onchain_metrics(
+        market_cap=1000.0,
+        realized_cap=600.0,
+        prev_realized_cap_30d=500.0,
+        hot_capital_val=200.0,
+    )
+    assert m_valid.nupl == 0.40
+    assert m_valid.realized_cap_change_pct == 20.0
+    assert m_valid.hot_capital_share == 0.20
+
+    # Empty altcoin dict for ASI
+    empty_asi = OnChainIndicatorsCalculator.calculate_altcoin_season_index(0.1, {})
+    assert empty_asi.total_universe_count == 0
+
+
+def test_market_feed_empty_and_event_creators() -> None:
+    # Empty ticks
+    df_empty = MarketFeedNormalizer.normalize_ticks_to_polars([])
+    assert df_empty.height == 0
+
+    # Tick event creator
+    tick_evt = MarketFeedNormalizer.create_tick_event("t_1", 100.0, "BTC", 50000.0, 1000.0)
+    assert tick_evt.symbol == "BTC"
+    assert tick_evt.price == 50000.0
+
+    # Empty depth event creator
+    depth_empty = MarketFeedNormalizer.create_depth_event("d_1", 100.0, "BTC", {}, {})
+    assert depth_empty.depth_2pct_bid == 0.0
+    assert depth_empty.depth_2pct_ask == 0.0
+
+
+def test_derivatives_zero_oi() -> None:
+    status_zero = DerivativesFeedCalculator.calculate_crypto_margin_ratio(0.0, 0.0)
+    assert status_zero.crypto_margin_ratio == 0.0
+    assert status_zero.leverage_alert_flag is False

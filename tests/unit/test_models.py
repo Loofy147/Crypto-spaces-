@@ -89,3 +89,54 @@ def test_regime_classifier() -> None:
 
     res_trained = classifier.classify([100.0, 1.5, 0.70, 0.20])
     assert res_trained.regime in [MarketRegime.BULL, MarketRegime.BEAR, MarketRegime.CONSOLIDATION]
+
+    # Test train with empty data
+    empty_classifier = RegimeClassifier()
+    empty_classifier.train(np.array([]), np.array([]))
+    assert empty_classifier._is_trained is False
+
+    # Test fallback classification regimes
+    cons_res = classifier.classify([0.0, 1.0, 0.40, 0.0])
+    assert cons_res.risk_aversion_gamma in [1.0, 2.0, 3.0]
+
+
+def test_risk_parity_edge_cases_and_scipy_fallback() -> None:
+    optimizer = RiskParityOptimizer()
+
+    # Empty asset names
+    assert optimizer.optimize_risk_parity([], np.array([[]])) == {}
+
+    # SciPy SLSQP Direct Fallback
+    cov = np.array([[0.04, 0.01], [0.01, 0.09]])
+    scipy_weights = optimizer._solve_scipy(2, cov)
+    assert scipy_weights is not None
+    assert abs(np.sum(scipy_weights) - 1.0) < 1e-4
+
+    # Covariance matrix causing CVXPY failure fallback
+    bad_cov = np.array([[1e-12, 0.0], [0.0, 1e-12]])
+    res = optimizer.optimize_risk_parity(["A", "B"], bad_cov)
+    assert "A" in res and "B" in res
+
+
+def test_volatility_targeter_with_cov_matrix() -> None:
+    targeter = VolatilityTargeter(target_volatility=0.20)
+    cov = np.array([[0.09, 0.02], [0.02, 0.16]])
+    assets = ["BTC", "ETH"]
+    base_w = {"BTC": 0.50, "ETH": 0.50}
+
+    res = targeter.scale_positions(
+        base_weights=base_w,
+        realized_vols={},
+        portfolio_cov_matrix=cov,
+        asset_names=assets,
+    )
+
+    assert res.scaler_factor < 1.0
+    assert res.realized_volatility > 0.0
+
+    # Zero portfolio vol
+    res_zero = targeter.scale_positions(
+        base_weights={"BTC": 0.0},
+        realized_vols={"BTC": 0.0},
+    )
+    assert res_zero.scaler_factor == 1.0
