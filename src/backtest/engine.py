@@ -8,15 +8,18 @@ from pydantic import BaseModel, ConfigDict
 from src.core.events import PortfolioEvent
 from src.core.state import apply_event
 from src.core.types import AssetCategory, PortfolioState
+from src.data.derivatives_feed import DerivativesFeedCalculator, MicrostructureRegime
+from src.data.onchain_indicators import OnChainIndicatorsCalculator
 from src.execution.pre_trade_risk import PreTradeRiskEngine
 from src.execution.rebalancer import HybridDriftRebalancer
+from src.models.regime_classifier import MarketRegime, RegimeClassifier
 from src.models.risk_parity import RiskParityOptimizer
 from src.models.rwa_sleeve import RWASleeveManager
 from src.models.vol_targeting import VolatilityTargeter
 
 
 from pydantic import Field
-from src.core.events import MarketTickEvent, OrderExecutedEvent, RebalanceTriggeredEvent
+from src.core.events import DerivativesMetricsEvent, MarketTickEvent, OrderExecutedEvent, RebalanceTriggeredEvent
 from src.core.state import apply_order_executed
 
 
@@ -47,6 +50,7 @@ class BacktestEngine:
         rwa_manager: RWASleeveManager | None = None,
         rebalancer: HybridDriftRebalancer | None = None,
         risk_engine: PreTradeRiskEngine | None = None,
+        regime_classifier: RegimeClassifier | None = None,
     ) -> None:
         self.initial_cash = initial_cash
         self.risk_parity_opt = risk_parity_opt or RiskParityOptimizer()
@@ -54,6 +58,9 @@ class BacktestEngine:
         self.rwa_manager = rwa_manager or RWASleeveManager()
         self.rebalancer = rebalancer or HybridDriftRebalancer()
         self.risk_engine = risk_engine or PreTradeRiskEngine()
+        self.regime_classifier = regime_classifier or RegimeClassifier()
+        self.derivatives_calc = DerivativesFeedCalculator()
+        self.onchain_calc = OnChainIndicatorsCalculator()
 
     def _execute_rebalance_orders(
         self,
@@ -171,6 +178,7 @@ class BacktestEngine:
         )
 
         price_history: Dict[str, List[float]] = {}
+        latest_derivatives: Dict[str, DerivativesMetricsEvent] = {}
 
         for event in events:
             if isinstance(event, MarketTickEvent):
@@ -178,6 +186,8 @@ class BacktestEngine:
                 if event.symbol not in price_history:
                     price_history[event.symbol] = []
                 price_history[event.symbol].append(event.price)
+            elif isinstance(event, DerivativesMetricsEvent):
+                latest_derivatives[event.symbol] = event
 
             # Apply event strictly up to t-1
             state = apply_event(state, event)
@@ -200,18 +210,48 @@ class BacktestEngine:
                         else:
                             realized_vols[sym] = 0.30
 
+                    base_w = dict(plan.weights)
+
+                    # Apply derivatives CVD divergence & regime classifier risk adjustment
+                    if "BTC" in latest_derivatives:
+                        btc_deriv = latest_derivatives["BTC"]
+                        cvd_status = self.derivatives_calc.detect_cvd_divergence(
+                            spot_cvd=btc_deriv.spot_cvd,
+                            perp_cvd=btc_deriv.perp_cvd,
+                        )
+                        regime_res = self.regime_classifier.classify(
+                            [
+                                btc_deriv.spot_cvd - btc_deriv.perp_cvd,
+                                1.0,
+                                0.5,
+                                0.0,
+                            ]
+                        )
+                        gamma = regime_res.risk_aversion_gamma
+                        if (
+                            cvd_status.regime == MicrostructureRegime.BROAD_LIQUIDATION
+                            or regime_res.regime == MarketRegime.BEAR
+                        ):
+                            # Scale down risky asset weights by 1/gamma during bear / liquidation regimes
+                            risky_allocated = 0.0
+                            for sym in ["BTC", "ETH", "SOL", "AVAX"]:
+                                if sym in base_w:
+                                    base_w[sym] = base_w[sym] / gamma
+                                    risky_allocated += base_w[sym]
+                            base_w["BUIDL"] = max(0.0, 1.0 - risky_allocated)
+
                     if realized_vols:
                         vol_res = self.vol_targeter.scale_positions(
-                            base_weights=plan.weights,
+                            base_weights=base_w,
                             realized_vols=realized_vols,
                         )
                         target_w = vol_res.scaled_weights
                     else:
-                        target_w = plan.weights
+                        target_w = base_w
 
                 # Check if portfolio is unallocated or drift rebalancing is triggered at end of price update sequence
                 has_unallocated = len(state.positions) < len(plan.weights) and len(latest_prices) >= len(plan.weights)
-                if is_explicit_trigger or has_unallocated or (event.sequence % 5 == 4):
+                if is_explicit_trigger or has_unallocated or (event.sequence % 6 == 5):
                     state, r_count = self._execute_rebalance_orders(
                         state=state,
                         target_weights=target_w,
@@ -227,7 +267,7 @@ class BacktestEngine:
             timestamps.append(state.timestamp)
 
             # Collect daily snapshot at sequence end or last event of day
-            if event.sequence % 5 == 4 or event.sequence == len(events) - 1:
+            if event.sequence % 6 == 5 or event.sequence == len(events) - 1:
                 daily_equity_curve.append(state.total_equity)
 
         # Performance summary calculated on daily equity curve
