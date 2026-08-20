@@ -13,7 +13,7 @@ from src.attribution.pnl_decomposer import PnLDecomposer
 from src.backtest.cpcv import CombinatorialPurgedCrossValidation
 from src.backtest.dsr import DeflatedSharpeRatioCalculator, StrategyOverfittedException
 from src.backtest.engine import BacktestEngine
-from src.core.events import MarketTickEvent, YieldAccruedEvent
+from src.core.events import DerivativesMetricsEvent, MarketTickEvent, YieldAccruedEvent
 from src.data.derivatives_feed import DerivativesFeedCalculator
 from src.data.onchain_indicators import OnChainIndicatorsCalculator
 from src.models.risk_parity import RiskParityOptimizer
@@ -60,7 +60,7 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_btc_{day}",
                 timestamp=ts,
-                sequence=day * 5,
+                sequence=day * 6,
                 symbol="BTC",
                 price=btc_price,
             )
@@ -69,7 +69,7 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_eth_{day}",
                 timestamp=ts,
-                sequence=day * 5 + 1,
+                sequence=day * 6 + 1,
                 symbol="ETH",
                 price=eth_price,
             )
@@ -78,7 +78,7 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_sol_{day}",
                 timestamp=ts,
-                sequence=day * 5 + 2,
+                sequence=day * 6 + 2,
                 symbol="SOL",
                 price=sol_price,
             )
@@ -87,9 +87,26 @@ def run_3year_simulation() -> None:
             MarketTickEvent(
                 event_id=f"tick_avax_{day}",
                 timestamp=ts,
-                sequence=day * 5 + 3,
+                sequence=day * 6 + 3,
                 symbol="AVAX",
                 price=avax_price,
+            )
+        )
+
+        # Emit daily derivatives metrics event (CVD & Open Interest)
+        spot_cvd = float(np.sum(btc_returns[-7:])) * 1000000.0 if len(btc_returns) >= 7 else 100000.0
+        perp_cvd = spot_cvd * (0.8 if btc_ret > 0 else 1.2)
+        events.append(
+            DerivativesMetricsEvent(
+                event_id=f"deriv_btc_{day}",
+                timestamp=ts,
+                sequence=day * 6 + 4,
+                symbol="BTC",
+                crypto_margined_oi=400000000.0,
+                cash_margined_oi=600000000.0,
+                spot_cvd=spot_cvd,
+                perp_cvd=perp_cvd,
+                funding_rate=0.0001 if btc_ret > 0 else -0.0001,
             )
         )
 
@@ -99,7 +116,7 @@ def run_3year_simulation() -> None:
             YieldAccruedEvent(
                 event_id=f"yield_{day}",
                 timestamp=ts,
-                sequence=day * 5 + 4,
+                sequence=day * 6 + 5,
                 asset_symbol="BUIDL",
                 amount=daily_yield,
                 apy_rate=0.045,

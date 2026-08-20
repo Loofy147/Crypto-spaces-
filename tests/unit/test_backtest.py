@@ -5,7 +5,7 @@ from src.attribution.pnl_decomposer import PnLDecomposer
 from src.backtest.cpcv import CombinatorialPurgedCrossValidation
 from src.backtest.dsr import DeflatedSharpeRatioCalculator
 from src.backtest.engine import BacktestEngine
-from src.core.events import MarketTickEvent, RebalanceTriggeredEvent
+from src.core.events import DerivativesMetricsEvent, MarketTickEvent, RebalanceTriggeredEvent
 
 
 def test_cpcv_splits_generation() -> None:
@@ -46,13 +46,24 @@ def test_backtest_engine_run() -> None:
     events = [
         MarketTickEvent(event_id="t1", timestamp=100.0, sequence=0, symbol="BTC", price=50000.0),
         MarketTickEvent(event_id="t2", timestamp=86500.0, sequence=1, symbol="ETH", price=3000.0),
-        RebalanceTriggeredEvent(event_id="r1", timestamp=86600.0, sequence=2, reason="Periodic", target_weights={"BTC": 0.5, "ETH": 0.5}),
+        DerivativesMetricsEvent(
+            event_id="d1",
+            timestamp=86550.0,
+            sequence=2,
+            symbol="BTC",
+            crypto_margined_oi=500.0,
+            cash_margined_oi=500.0,
+            spot_cvd=-100.0,
+            perp_cvd=-200.0,
+            funding_rate=-0.001,
+        ),
+        RebalanceTriggeredEvent(event_id="r1", timestamp=86600.0, sequence=3, reason="Periodic", target_weights={"BTC": 0.5, "ETH": 0.5}),
     ]
 
     summary = engine.run_backtest(events)
     assert summary.initial_equity == 100000.0
     assert summary.final_equity > 0.0
-    assert len(summary.equity_curve) == 4
+    assert len(summary.equity_curve) == 5
     assert len(summary.daily_returns) >= 0
 
 
