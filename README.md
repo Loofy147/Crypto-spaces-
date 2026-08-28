@@ -147,3 +147,24 @@ mypy --strict src/
 ```bash
 python scripts/run_simulation.py
 ```
+
+---
+
+## 🗺 Institutional Roadmap & Next Steps
+
+### Phase 1: Core Institutional Infrastructure (Completed)
+- [x] **Event-Sourced Pure Functional Core:** Immutable point-in-time state reconstruction engine.
+- [x] **Quantitative Risk Parity Optimization:** CVXPY convex logarithmic barrier solver with SciPy SLSQP fallback.
+- [x] **Volatility Targeting & RWA Yield Sleeve:** Dynamic capital de-leveraging into tokenized Treasury yield vehicles (BUIDL, USDY).
+- [x] **Backtest Overfitting Verification Gate:** CPCV partitioning with purging/embargoing and Deflated Sharpe Ratio (DSR/PBO) statistical testing.
+- [x] **Market Regime Classifier:** Multi-factor XGBoost machine learning classifier adjusting dynamic portfolio risk aversion ($\gamma$).
+- [x] **Pre-Trade Risk & Smart Order Routing:** Multi-collateral haircut enforcement, 2% order book depth-aware slippage and execution filtering.
+
+### Phase 2: Advanced AI & Execution Optimizations (Target: Q3 2025)
+- [ ] **Reinforcement Learning (RL) Rebalancing Agent:** PyTorch-based Deep RL agent utilizing LSTM network layers to optimize gradual portfolio rebalancing, targeting a 27%–93% cost reduction relative to static full rebalancing.
+- [ ] **On-Chain Yield Aggregator Router:** Automated smart contract yield routing across decentralized lending pools and tokenized RWA money market funds (OUSG, BENJI, Hashnote USYC).
+- [ ] **High-Frequency Microstructure Depth Simulator:** Microsecond-level order book depth dynamics and liquidation cascade contagion simulation engine.
+
+### Phase 3: Multi-Chain Collateral & Regulatory Reporting (Target: Q4 2025)
+- [ ] **Cross-Chain Multi-Collateral Vaults:** Unified cross-chain margin aggregation supporting native BTC, ETH, and tokenized RWAs via CCIP and LayerZero bridges.
+- [ ] **Automated Institutional Tax & Regulatory Reporting:** On-chain MiCA and SEC-compliant transaction audit trails, trade reconstruction, and real-time P&L attribution reporting.

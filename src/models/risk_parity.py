@@ -1,14 +1,14 @@
 """Risk Parity Convex Optimization Engine (CVXPY & SciPy)."""
 
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 import cvxpy as cp
 import numpy as np
 from scipy.optimize import minimize  # type: ignore[import-untyped]
 
 
 def compute_marginal_risk_contributions(
-    weights: np.ndarray, cov_matrix: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+    weights: np.ndarray[Any, Any], cov_matrix: np.ndarray[Any, Any]
+) -> Tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
     """Computes MCR and RC vectors for a given weight vector and covariance matrix.
 
     MCR_i = (Sigma w)_i / sqrt(w^T Sigma w)
@@ -32,7 +32,7 @@ class RiskParityOptimizer:
         self.tol = tol
 
     def optimize_risk_parity(
-        self, asset_names: List[str], cov_matrix: np.ndarray
+        self, asset_names: List[str], cov_matrix: np.ndarray[Any, Any]
     ) -> Dict[str, float]:
         """Equalizes Marginal Risk Contribution (MRC) across components."""
         n = len(asset_names)
@@ -59,7 +59,7 @@ class RiskParityOptimizer:
 
         return {name: float(weights[i]) for i, name in enumerate(asset_names)}
 
-    def _solve_cvxpy(self, n: int, cov_matrix: np.ndarray) -> np.ndarray | None:
+    def _solve_cvxpy(self, n: int, cov_matrix: np.ndarray[Any, Any]) -> np.ndarray[Any, Any] | None:
         """Solves log-barrier Risk Parity formulation using CVXPY:
 
         min 0.5 * y^T Sigma y - sum(log(y_i))
@@ -74,17 +74,17 @@ class RiskParityOptimizer:
             problem.solve(solver=cp.CLARABEL, verbose=False)  # type: ignore[no-untyped-call]
 
             if problem.status in [cp.OPTIMAL, cp.OPTIMAL_INACCURATE] and y.value is not None:
-                y_val: np.ndarray = np.array(y.value).flatten()
-                res: np.ndarray = y_val / float(np.sum(y_val))
+                y_val: np.ndarray[Any, Any] = np.array(y.value).flatten()
+                res: np.ndarray[Any, Any] = y_val / float(np.sum(y_val))
                 return res
         except Exception:
             pass
         return None
 
-    def _solve_scipy(self, n: int, cov_matrix: np.ndarray) -> np.ndarray:
+    def _solve_scipy(self, n: int, cov_matrix: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
         """Fallback SciPy SLSQP optimizer directly minimizing sum of squared RC differences."""
 
-        def objective(w: np.ndarray) -> float:
+        def objective(w: np.ndarray[Any, Any]) -> float:
             mcr, rc = compute_marginal_risk_contributions(w, cov_matrix)
             diffs = rc[:, None] - rc[None, :]
             return float(np.sum(diffs**2))
@@ -103,6 +103,6 @@ class RiskParityOptimizer:
         )
 
         if res.success and res.x is not None:
-            ans: np.ndarray = np.array(res.x)
+            ans: np.ndarray[Any, Any] = np.array(res.x)
             return ans
         return x0
