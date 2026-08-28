@@ -1,6 +1,6 @@
 """Volatility Targeting & Risk Capital De-leveraging Engine."""
 
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 import numpy as np
 from pydantic import BaseModel, ConfigDict
 
@@ -28,7 +28,7 @@ class VolatilityTargeter:
         self,
         base_weights: Dict[str, float],
         realized_vols: Dict[str, float],
-        portfolio_cov_matrix: np.ndarray | None = None,
+        portfolio_cov_matrix: np.ndarray[Any, Any] | None = None,
         asset_names: list[str] | None = None,
     ) -> VolatilityTargetingResult:
         """Scales base weights inversely based on realized volatility.

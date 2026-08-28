@@ -30,7 +30,7 @@ class RegimeClassifier:
         self.label_map = {0: MarketRegime.BULL, 1: MarketRegime.BEAR, 2: MarketRegime.CONSOLIDATION}
         self.reverse_label_map = {v: k for k, v in self.label_map.items()}
 
-    def train(self, X: np.ndarray, y: np.ndarray) -> None:
+    def train(self, X: np.ndarray[Any, Any], y: np.ndarray[Any, Any]) -> None:
         """Train XGBoost multi-class classifier."""
         if len(X) == 0 or len(y) == 0:
             return
