@@ -25,14 +25,16 @@ jobs:
       - name: Install focused research and API dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install "numpy>=1.26" "scipy>=1.12" "pytest>=8" "pytest-cov>=4.1" "fastapi>=0.110,<1" "uvicorn[standard]>=0.27,<1"
-      - name: Test volatility models and market-data contracts
+          python -m pip install "numpy>=1.26" "scipy>=1.12" "pytest>=8" "pytest-cov>=4.1" "fastapi>=0.110,<1" "uvicorn[standard]>=0.27,<1" "psycopg[binary]>=3.2"
+      - name: Test volatility models, market-data contracts and snapshot storage
         run: |
           python -m pytest -q \
             tests/unit/test_volatility_forecasting.py \
-            tests/unit/test_market_data_providers.py
+            tests/unit/test_market_data_providers.py \
+            tests/unit/test_volatility_snapshot.py
       - name: Verify API and worker imports
         run: |
           python -c "from src.api.app import app; assert app.title == 'ETH Volatility Intelligence API'"
           python -c "import scripts.run_volatility_cycle"
+          python -c "import scripts.export_volatility_snapshot"
           python -m compileall -q src scripts
