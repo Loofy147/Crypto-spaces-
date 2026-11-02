@@ -125,7 +125,12 @@ def forecast_price_interval_horizon(
     lower, median, upper = np.quantile(
         prices, [tail, 0.5, 1.0 - tail]
     )
-    horizon_volatility = float(np.sqrt(np.mean(cumulative_variance_pct2) / 10_000.0))
+    # A few extreme paths can dominate the arithmetic mean under heavy-tailed
+    # innovations (especially for EGARCH). The median path standard deviation
+    # is a more stable "typical move" summary; price quantiles still retain tails.
+    horizon_volatility = float(
+        np.median(np.sqrt(cumulative_variance_pct2 / 10_000.0))
+    )
     annualized_volatility = horizon_volatility * float(
         np.sqrt(periods_per_year / horizon_steps)
     )
