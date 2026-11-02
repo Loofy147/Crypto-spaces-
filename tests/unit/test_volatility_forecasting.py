@@ -16,6 +16,7 @@ from src.models.volatility_forecasting import (
     realized_variance,
     score_variance_forecasts,
 )
+from src.models.horizon_forecasting import forecast_price_interval_horizon
 
 
 def clustered_returns(size: int = 520, seed: int = 17) -> np.ndarray:
@@ -37,6 +38,10 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     fitted = fit_volatility_model(clustered_returns(), model=model)  # type: ignore[arg-type]
     variance = next_period_variance(fitted)
     interval = forecast_price_interval(fitted, spot_price=2_285.0, confidence=0.95)
+    horizon = forecast_price_interval_horizon(
+        fitted, spot_price=2_285.0, horizon_steps=24,
+        confidence=0.95, simulations=4_000, random_seed=17,
+    )
 
     assert fitted.converged is True
     assert fitted.observations == 520
@@ -44,6 +49,24 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     assert interval.lower_price < interval.median_price < interval.upper_price
     assert interval.conditional_volatility > 0.0
     assert interval.annualized_volatility > interval.conditional_volatility
+    assert horizon.lower_price < horizon.median_price < horizon.upper_price
+    assert horizon.horizon_steps == 24
+    assert horizon.simulations == 4_000
+    assert horizon.conditional_volatility > 0.0
+    assert horizon.annualized_volatility > horizon.conditional_volatility
+
+
+def test_horizon_simulation_is_reproducible() -> None:
+    fitted = fit_volatility_model(clustered_returns(), model="GARCH")
+    first = forecast_price_interval_horizon(
+        fitted, 2_000.0, simulations=2_000, random_seed=99
+    )
+    second = forecast_price_interval_horizon(
+        fitted, 2_000.0, simulations=2_000, random_seed=99
+    )
+    assert first.lower_price == pytest.approx(second.lower_price)
+    assert first.median_price == pytest.approx(second.median_price)
+    assert first.upper_price == pytest.approx(second.upper_price)
 
 
 def test_gjr_garch_persistence_respects_stationarity_constraint() -> None:
@@ -109,3 +132,6 @@ def test_invalid_inputs_fail_closed() -> None:
         price_interval_from_variance(spot_price=0.0, conditional_variance=0.01)
     with pytest.raises(ValueError):
         combine_variance_forecasts({"garch": 0.01}, {"garch": 0.9})
+    fitted = fit_volatility_model(clustered_returns(), model="GARCH")
+    with pytest.raises(ValueError, match="horizon_steps"):
+        forecast_price_interval_horizon(fitted, 2_000.0, horizon_steps=0)
