@@ -146,9 +146,31 @@ incremental value over the benchmark.
 | V07 | Persistence, API and scheduling | Replayable forecast records and monitoring |
 | V08 | Dashboard | UI reads persisted, versioned forecast artifacts |
 
+## Market data ingestion
+
+Coinbase Exchange ETH-USD and Kraken Spot ETH/USD public OHLCV adapters are
+implemented in `src/data/market_data_providers.py`. Their canonical candle
+contract, timestamp semantics, source limitations and invocation examples are
+documented in `docs/ETH_MARKET_DATA_CONTRACT.md`. The adapters keep providers
+and quote currencies separate, preserve unfinished bars with `is_final=false`,
+record source hashes, expose missing intervals, and never fill gaps. A Coinbase
+4h series can be derived only from complete contiguous UTC-aligned 1h bars.
+
+Run the ingestion command from the repository root:
+
+```bash
+python scripts/fetch_market_candles.py --provider coinbase --instrument ETH-USD --interval 1h --start 2026-10-01T00:00:00Z --end 2026-11-01T00:00:00Z
+python scripts/fetch_market_candles.py --provider kraken --instrument ETHUSD --interval 1h
+```
+
+The command writes local JSONL observations and a compact manifest under
+`artifacts/market-data/`. It does not commit fetched data automatically.
+
 ## Current status
 
-The first model module and deterministic unit tests are implemented in the
-repository. This does not establish live-market connectivity, independently
-validated ETH/USD forecast accuracy, scheduled execution, or deployment. Those
+The model module, public provider adapters, local ingestion CLI, canonical data
+contract and deterministic fixture tests are implemented in the repository.
+The provider endpoints have not yet been executed from this environment. This
+does not establish live-market connectivity, independently validated ETH/USD
+forecast accuracy, scheduled execution, forecast API or deployment. Those
 remain separate acceptance gates.

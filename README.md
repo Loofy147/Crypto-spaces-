@@ -180,6 +180,9 @@ conditional price intervals and variance scoring.
 
 See [`docs/ETH_VOLATILITY_RESEARCH.md`](docs/ETH_VOLATILITY_RESEARCH.md) for
 the data contract, interpretation limits, validation protocol and next gates.
-This is a research component only; it is not connected yet to live exchange
-ingestion, persistent forecast storage, scheduled execution, an API or a
-deployed dashboard.
+This is a research component; public Coinbase Exchange and Kraken Spot OHLCV
+adapters, a local ingestion CLI, a canonical data contract and deterministic
+provider tests are included. Live endpoint execution, persistent forecast
+storage, scheduled model execution, a forecast API and a deployed dashboard
+remain separate gates. See docs/ETH_MARKET_DATA_CONTRACT.md and
+docs/ETH_VOLATILITY_RESEARCH.md.
