@@ -243,3 +243,48 @@ def test_longest_contiguous_segment_refuses_to_bridge_gaps_and_prefers_recent_ti
     selected = longest_contiguous_finalized_segment(rows)
     assert [row.source_bar_timestamp for row in selected] == [10_800, 14_400]
     assert len(longest_contiguous_finalized_segment(rows[:2])) == 2
+
+
+def test_coinbase_adapter_deduplicates_identical_page_boundary_candles() -> None:
+    start = 0
+    boundary = 299 * 3_600
+    end = 300 * 3_600
+    first_page = [
+        [boundary, 100, 102, 101, 101.5, 8],
+    ]
+    second_page = [
+        [boundary, 100, 102, 101, 101.5, 8],
+        [boundary + 3_600, 101, 103, 102, 102.5, 9],
+    ]
+    responses = iter([first_page, second_page])
+    client = CoinbaseExchangeClient(
+        json_getter=lambda _: next(responses),
+        page_delay_seconds=0.0,
+    )
+
+    batch = client.fetch_range(
+        "ETH-USD", "1h", start, end, as_of_timestamp=end + 3_600,
+    )
+
+    assert [c.source_bar_timestamp for c in batch.candles] == [
+        boundary, boundary + 3_600,
+    ]
+    assert len({c.event_time for c in batch.candles}) == len(batch.candles)
+
+
+def test_coinbase_adapter_rejects_conflicting_page_boundary_candles() -> None:
+    start = 0
+    boundary = 299 * 3_600
+    end = 300 * 3_600
+    first_page = [[boundary, 100, 102, 101, 101.5, 8]]
+    conflicting_page = [[boundary, 99, 102, 100, 100.5, 8]]
+    responses = iter([first_page, conflicting_page])
+    client = CoinbaseExchangeClient(
+        json_getter=lambda _: next(responses),
+        page_delay_seconds=0.0,
+    )
+
+    with pytest.raises(MarketDataProviderError, match="conflicting duplicate candle"):
+        client.fetch_range(
+            "ETH-USD", "1h", start, end, as_of_timestamp=end + 3_600,
+        )
