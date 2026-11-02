@@ -1,6 +1,15 @@
 name: ETH/USD hourly volatility snapshot
 
 on:
+  push:
+    branches:
+      - feat/eth-volatility-forecasting
+    paths:
+      - ".github/workflows/eth-volatility-snapshot.yml"
+      - "scripts/export_volatility_snapshot.py"
+      - "src/volatility_snapshot.py"
+      - "src/models/volatility_forecasting.py"
+      - "src/data/**"
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
