@@ -252,3 +252,37 @@ def compare_venue_closes(left: Sequence[MarketCandle], right: Sequence[MarketCan
         max_absolute_difference_bps=float(max(abs(value) for value in differences)),
         observations=observations,
     )
+
+
+def longest_contiguous_finalized_segment(
+    candles: Sequence[MarketCandle],
+) -> tuple[MarketCandle, ...]:
+    """Return the longest finalized gap-free segment from exactly one series.
+
+    A gap starts a new segment. Partial candles are excluded. Ties prefer the
+    most recent segment so the returned sample is not unnecessarily stale.
+    """
+    finalized = sorted(
+        (candle for candle in candles if candle.is_final),
+        key=lambda candle: candle.event_time,
+    )
+    if not finalized:
+        return ()
+    identity = {
+        (c.venue, c.instrument, c.base_currency, c.quote_currency, c.interval)
+        for c in finalized
+    }
+    if len(identity) != 1:
+        raise ValueError("segment selection cannot mix venues, instruments, quotes or intervals")
+    duration = INTERVAL_SECONDS[finalized[0].interval]
+    segments: list[list[MarketCandle]] = []
+    current: list[MarketCandle] = []
+    for candle in finalized:
+        if current and candle.event_time - current[-1].event_time != duration:
+            segments.append(current)
+            current = []
+        current.append(candle)
+    if current:
+        segments.append(current)
+    best = max(segments, key=lambda segment: (len(segment), segment[-1].event_time))
+    return tuple(best)

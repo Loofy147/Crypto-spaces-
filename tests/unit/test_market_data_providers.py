@@ -14,6 +14,7 @@ from src.data.ohlcv_contract import (
     audit_candle_series,
     compare_venue_closes,
     finalized_contiguous_log_returns,
+    longest_contiguous_finalized_segment,
     payload_sha256,
     rollup_candles,
 )
@@ -230,3 +231,15 @@ def test_coinbase_adapter_splits_large_ranges_below_documented_page_limit() -> N
     second = parse_qs(urlparse(calls[1]).query)
     assert first["start"][0].startswith("1970-01-01T00:00:00")
     assert first["end"][0] == second["start"][0]
+
+
+def test_longest_contiguous_segment_refuses_to_bridge_gaps_and_prefers_recent_tie() -> None:
+    rows = [
+        make_candle(start=0, close=100.0),
+        make_candle(start=3_600, close=101.0),
+        make_candle(start=10_800, close=102.0),
+        make_candle(start=14_400, close=103.0),
+    ]
+    selected = longest_contiguous_finalized_segment(rows)
+    assert [row.source_bar_timestamp for row in selected] == [10_800, 14_400]
+    assert len(longest_contiguous_finalized_segment(rows[:2])) == 2
