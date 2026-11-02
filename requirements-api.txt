@@ -1,0 +1,8 @@
+# Runtime dependencies for the read-only API and scheduled quant worker.
+# Keep this file as the single Render install contract until Poetry export is
+# included in the repository's release workflow.
+numpy>=1.26,<3
+scipy>=1.12,<2
+fastapi>=0.110,<1
+uvicorn[standard]>=0.27,<1
+psycopg[binary]>=3.1,<4
