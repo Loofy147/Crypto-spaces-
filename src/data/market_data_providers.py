@@ -128,7 +128,7 @@ class CoinbaseExchangeClient:
         retrieved_at = _epoch_now()
         as_of = retrieved_at if as_of_timestamp is None else as_of_timestamp
         pieces: list[Any] = []
-        records: list[MarketCandle] = []
+        records_by_source_start: dict[int, MarketCandle] = {}
         cursor = start_timestamp
         page_span = duration * 299
         base, separator, quote_currency = product_id.upper().partition("-")
@@ -159,7 +159,7 @@ class CoinbaseExchangeClient:
                     raise MarketDataProviderError(f"Coinbase candle contains an invalid field: {exc}") from exc
                 if source_start < start_timestamp or source_start >= end_timestamp:
                     continue
-                records.append(MarketCandle(
+                candle = MarketCandle(
                     venue="coinbase",
                     instrument=product_id.upper(),
                     base_currency=base,
@@ -175,14 +175,23 @@ class CoinbaseExchangeClient:
                     ingested_at=retrieved_at,
                     is_final=(source_start + duration) <= as_of,
                     source_payload_sha256=payload_sha256(row),
-                ))
+                )
+                previous = records_by_source_start.get(source_start)
+                if previous is not None:
+                    if previous.source_payload_sha256 != candle.source_payload_sha256:
+                        raise MarketDataProviderError(
+                            "Coinbase returned conflicting duplicate candle boundaries across pages"
+                        )
+                    continue
+                records_by_source_start[source_start] = candle
             cursor = page_end
             if cursor < end_timestamp and self._page_delay_seconds:
                 time.sleep(self._page_delay_seconds)
 
-        records.sort(key=lambda candle: candle.source_bar_timestamp)
-        if len({c.event_time for c in records}) != len(records):
-            raise MarketDataProviderError("Coinbase returned duplicate candle boundaries across pages")
+        records = sorted(
+            records_by_source_start.values(),
+            key=lambda candle: candle.source_bar_timestamp,
+        )
         digest = payload_sha256(pieces)
         return CandleFetchBatch(
             provider="coinbase",
