@@ -19,6 +19,7 @@ from src.models.volatility_forecasting import (
     forecast_price_interval,
     next_period_variance,
 )
+from src.models.horizon_forecasting import forecast_price_interval_horizon
 from src.storage.postgres_repository import PostgresRepository
 
 
@@ -36,6 +37,15 @@ def _forecast_payload(venue: str, candles: tuple, model: str) -> dict:
     interval = forecast_price_interval(
         fit, spot_price=spot, confidence=0.95, periods_per_year=365 * 24
     )
+    horizon = forecast_price_interval_horizon(
+        fit,
+        spot_price=spot,
+        horizon_steps=24,
+        confidence=0.95,
+        simulations=20_000,
+        random_seed=1_729,
+        periods_per_year=365 * 24,
+    )
     data_hash = hashlib.sha256(
         json.dumps(
             [c.to_dict() for c in finalized],
@@ -49,6 +59,7 @@ def _forecast_payload(venue: str, candles: tuple, model: str) -> dict:
         "quote_currency": finalized[-1].quote_currency,
         "interval": finalized[-1].interval,
         "forecast_horizon_steps": 1,
+        "forecast_horizon_steps_24h": horizon.horizon_steps,
         "forecast_origin": finalized[-1].event_time,
         "model": model,
         "innovation_distribution": fit.distribution,
@@ -61,6 +72,9 @@ def _forecast_payload(venue: str, candles: tuple, model: str) -> dict:
         "conditional_variance": next_period_variance(fit),
         "conditional_volatility": interval.conditional_volatility,
         "annualized_volatility": interval.annualized_volatility,
+        "conditional_volatility_24h": horizon.conditional_volatility,
+        "annualized_volatility_24h": horizon.annualized_volatility,
+        "simulation_count_24h": horizon.simulations,
         "reference_price": spot,
         "mean_log_return": interval.mean_log_return,
         "degrees_of_freedom": interval.degrees_of_freedom,
@@ -69,6 +83,12 @@ def _forecast_payload(venue: str, candles: tuple, model: str) -> dict:
             "lower": interval.lower_price,
             "median": interval.median_price,
             "upper": interval.upper_price,
+        },
+        "price_quantiles_24h": {
+            "confidence": horizon.confidence,
+            "lower": horizon.lower_price,
+            "median": horizon.median_price,
+            "upper": horizon.upper_price,
         },
     }
 
