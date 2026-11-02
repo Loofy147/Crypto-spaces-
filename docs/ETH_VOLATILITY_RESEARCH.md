@@ -86,8 +86,8 @@ candle boundaries in a single return series.
 6. Variance combination requires explicit non-negative weights that sum to
    one. It intentionally does not learn weights from in-sample fit.
 7. The first increment does not yet implement APARCH, FIGARCH, regime-switching
-   GARCH, rolling-origin backtests, exchange ingestion, database persistence,
-   a live API, a scheduler, or a dashboard.
+   GARCH, rolling-origin backtests, or calibrated interval coverage. Exchange
+   ingestion, snapshot export and the dashboard are now implemented separately.
 
 ## Required data contract
 
@@ -196,3 +196,24 @@ The published snapshot includes a separate `price_quantiles_24h` object per venu
 ### Interpretation boundary
 
 Each model's 95% interval is conditional on the fitted model and sampled historical data. The dashboard's combined low-to-high envelope takes the lowest lower bound and highest upper bound across models. That combined envelope is not itself a calibrated 95% probability interval. Rolling out-of-sample coverage, interval calibration, and comparative model selection remain open research gates. The scenarios are not directional trading signals.
+
+
+### Typical-movement summary
+
+The 24-hour scenario output also reports a typical path-volatility summary. It
+uses the median of the simulated cumulative path standard deviations rather
+than the arithmetic mean. Under heavy-tailed innovations, a small number of
+extreme paths can dominate the mean and make a "typical move" figure unusable.
+The model's lower and upper price quantiles still retain tail outcomes; this
+median-path summary is only a descriptive volatility metric, not a replacement
+for the scenario interval.
+
+### Updated operational status
+
+The feature-branch GitHub workflows have successfully fetched public Coinbase
+and Kraken data, fit six model/venue combinations, and validated six ordered
+24-hour scenario ranges. A later median-path-volatility refinement has passed
+the focused model and import CI checks. The source workflow publisher is being
+hardened against concurrent branch updates. The workflow schedule is not active
+on the default branch until the pull request is merged. Out-of-sample interval
+calibration and forecast-accuracy validation remain open.
