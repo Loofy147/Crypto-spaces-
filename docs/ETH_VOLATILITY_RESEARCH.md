@@ -104,11 +104,14 @@ Each observation must identify:
 - \`is_final\`: whether the candle is complete.
 - \`source_payload_hash\`: provenance/integrity reference for raw observation.
 
-Validation must reject duplicate event keys, non-monotonic timestamps, invalid
-OHLC relationships, negative volume, non-finite prices, missing intervals,
-partial candles in completed-bar training sets, and unexplained cross-source
-divergence. Keep raw data immutable; store normalized observations as derived
-artifacts with transformation version and source provenance.
+Validation rejects duplicate event keys, non-monotonic timestamps, invalid
+OHLC relationships, negative or non-finite supplied volume, and non-finite
+prices. Missing intervals are surfaced as explicit gaps and are never
+forward-filled; contiguous-return construction and model fitting must refuse to
+bridge them. Partial candles are excluded from completed-bar training sets.
+Cross-source divergence is reported for common boundaries and is not silently
+averaged away. Keep raw provider values and source hashes; store normalized
+observations as derived artifacts with retrieval time and source provenance.
 
 ## Validation protocol before publishing a live forecast
 
