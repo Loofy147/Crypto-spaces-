@@ -53,6 +53,7 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     assert horizon.horizon_steps == 24
     assert horizon.simulations == 4_000
     assert horizon.conditional_volatility > 0.0
+    assert horizon.conditional_volatility < 1.0
     assert horizon.annualized_volatility > horizon.conditional_volatility
 
 
