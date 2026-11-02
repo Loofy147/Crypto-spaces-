@@ -49,6 +49,13 @@ def build_snapshot_document(
         "instrument": "ETH/USD",
         "forecast_interval": "1h",
         "forecast_horizon_steps": 1,
+        "primary_forecast_horizon": {
+            "steps": 24,
+            "unit": "hours",
+            "confidence_level": 0.95,
+            "method": "conditional_path_simulation",
+            "simulations_per_model": 20_000,
+        },
         "methodology": {
             "models": ["GARCH", "EGARCH", "GJR-GARCH"],
             "innovation_distribution": "student_t",
