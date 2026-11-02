@@ -248,7 +248,7 @@ def test_longest_contiguous_segment_refuses_to_bridge_gaps_and_prefers_recent_ti
 def test_coinbase_adapter_deduplicates_identical_page_boundary_candles() -> None:
     start = 0
     boundary = 299 * 3_600
-    end = 300 * 3_600
+    end = 301 * 3_600
     first_page = [
         [boundary, 100, 102, 101, 101.5, 8],
     ]
@@ -275,7 +275,7 @@ def test_coinbase_adapter_deduplicates_identical_page_boundary_candles() -> None
 def test_coinbase_adapter_rejects_conflicting_page_boundary_candles() -> None:
     start = 0
     boundary = 299 * 3_600
-    end = 300 * 3_600
+    end = 301 * 3_600
     first_page = [[boundary, 100, 102, 101, 101.5, 8]]
     conflicting_page = [[boundary, 99, 102, 100, 100.5, 8]]
     responses = iter([first_page, conflicting_page])
