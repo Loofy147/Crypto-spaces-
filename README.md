@@ -168,3 +168,18 @@ python scripts/run_simulation.py
 ### Phase 3: Multi-Chain Collateral & Regulatory Reporting (Target: Q4 2025)
 - [ ] **Cross-Chain Multi-Collateral Vaults:** Unified cross-chain margin aggregation supporting native BTC, ETH, and tokenized RWAs via CCIP and LayerZero bridges.
 - [ ] **Automated Institutional Tax & Regulatory Reporting:** On-chain MiCA and SEC-compliant transaction audit trails, trade reconstruction, and real-time P&L attribution reporting.
+
+
+## ETH/USD Volatility Research
+
+A first conditional-volatility research module is available in
+`src/models/volatility_forecasting.py`. It includes GARCH, EGARCH and
+GJR-GARCH maximum-likelihood fits with Gaussian or standardized Student-t
+innovations, EWMA and HAR-RV benchmarks, realized/bipower/jump variation,
+conditional price intervals and variance scoring.
+
+See [`docs/ETH_VOLATILITY_RESEARCH.md`](docs/ETH_VOLATILITY_RESEARCH.md) for
+the data contract, interpretation limits, validation protocol and next gates.
+This is a research component only; it is not connected yet to live exchange
+ingestion, persistent forecast storage, scheduled execution, an API or a
+deployed dashboard.
