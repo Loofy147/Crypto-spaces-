@@ -1,6 +1,6 @@
 # Render Blueprint for the ETH volatility API and hourly research cycle.
 # Syncing this Blueprint creates billable services and a managed PostgreSQL
-# database. Review the plan/costs in Render before confirming resource creation.
+# database. Review the plans/costs in Render before confirming resource creation.
 
 services:
   - type: web
@@ -10,6 +10,7 @@ services:
     plan: 0.5c-512mb
     branch: feat/eth-volatility-forecasting
     buildCommand: pip install -r requirements-api.txt
+    preDeployCommand: python scripts/init_database.py
     startCommand: uvicorn src.api.app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     autoDeploy: true
