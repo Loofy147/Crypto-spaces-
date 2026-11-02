@@ -4,8 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from src.data.market_data_providers import CoinbaseExchangeClient, KrakenSpotClient
 from src.data.ohlcv_contract import audit_candle_series, longest_contiguous_finalized_segment
