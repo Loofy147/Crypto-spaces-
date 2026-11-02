@@ -1,120 +1,225 @@
 {
-  "errors": [
-    "coinbase fetch: MarketDataProviderError: Coinbase returned duplicate candle boundaries across pages"
-  ],
+  "errors": [],
   "forecast_horizon_steps": 1,
   "forecast_interval": "1h",
   "forecasts": [
     {
-      "aic": 653.2063102933321,
-      "annualized_volatility": 0.341464383688909,
+      "aic": 2687.632485475434,
+      "annualized_volatility": 0.3385807032093135,
       "base_currency": "ETH",
-      "bic": 676.0956170819373,
-      "conditional_variance": 1.331026544840713e-05,
-      "conditional_volatility": 0.0036483236490759876,
-      "degrees_of_freedom": 2.7702531563786854,
+      "bic": 2717.4584769284947,
+      "conditional_variance": 1.308640326320927e-05,
+      "conditional_volatility": 0.003617513408849962,
+      "degrees_of_freedom": 2.812633959622389,
       "forecast_horizon_steps": 1,
       "forecast_origin": 1793631600,
       "innovation_distribution": "student_t",
-      "input_sha256": "f9ce81c1dcf22cc69c989c7b863c53ab8e7ffc30625ff5acc1c8a3984f24f879",
-      "instrument": "XETHZUSD",
+      "input_sha256": "e4aec0ea533b1b0838997b85dab92ec251eceb9846768383dd23f4b95082d832",
+      "instrument": "ETH-USD",
       "interval": "1h",
-      "log_likelihood": -321.60315514666604,
-      "mean_log_return": 9.209967086303082e-05,
+      "log_likelihood": -1338.816242737717,
+      "mean_log_return": 7.916802326891006e-05,
       "model": "GARCH",
       "model_parameters": {
-        "alpha": 0.5742829678169994,
-        "beta": 0.4247170321830006,
-        "mu": 0.009209967086303082,
-        "nu": 2.7702531563786854,
-        "omega": 0.06642156112342269
+        "alpha": 0.3015295465422294,
+        "beta": 0.6974704534577705,
+        "mu": 0.007916802326891006,
+        "nu": 2.812633959622389,
+        "omega": 0.027575988871321972
       },
-      "observations": 719,
+      "observations": 2879,
       "price_quantiles": {
         "confidence": 0.95,
-        "lower": 2273.4885193449004,
-        "median": 2288.1307263827275,
-        "upper": 2302.8672352941353
+        "lower": 2273.5992898940785,
+        "median": 2288.261149941228,
+        "upper": 2303.017560572114
       },
       "quote_currency": "USD",
-      "reference_price": 2287.92,
-      "venue": "kraken"
+      "reference_price": 2288.08,
+      "venue": "coinbase"
     },
     {
-      "aic": 653.9032786583539,
-      "annualized_volatility": 0.3266828716062627,
+      "aic": 2638.4174414399354,
+      "annualized_volatility": 0.34398133553285054,
       "base_currency": "ETH",
-      "bic": 681.3704468046801,
-      "conditional_variance": 1.2182842306040401e-05,
-      "conditional_volatility": 0.003490392858410125,
-      "degrees_of_freedom": 2.7639658096051782,
+      "bic": 2674.2086311836083,
+      "conditional_variance": 1.3507209953762957e-05,
+      "conditional_volatility": 0.003675215633641509,
+      "degrees_of_freedom": 2.804130381300823,
       "forecast_horizon_steps": 1,
       "forecast_origin": 1793631600,
       "innovation_distribution": "student_t",
-      "input_sha256": "f9ce81c1dcf22cc69c989c7b863c53ab8e7ffc30625ff5acc1c8a3984f24f879",
-      "instrument": "XETHZUSD",
+      "input_sha256": "e4aec0ea533b1b0838997b85dab92ec251eceb9846768383dd23f4b95082d832",
+      "instrument": "ETH-USD",
       "interval": "1h",
-      "log_likelihood": -320.95163932917694,
-      "mean_log_return": 9.171288846971602e-05,
+      "log_likelihood": -1313.2087207199677,
+      "mean_log_return": 8.689013533626439e-05,
       "model": "EGARCH",
       "model_parameters": {
-        "alpha": 0.6298755320370865,
-        "beta": 0.7924629442118782,
-        "gamma": -0.05010663189944871,
-        "mu": 0.009171288846971602,
-        "nu": 2.7639658096051782,
-        "omega": -0.29418801693159197
+        "alpha": 0.450558712543815,
+        "beta": 0.8991597708802335,
+        "gamma": 0.009840775737104426,
+        "mu": 0.008689013533626439,
+        "nu": 2.804130381300823,
+        "omega": -0.14367945558998454
+      },
+      "observations": 2879,
+      "price_quantiles": {
+        "confidence": 0.95,
+        "lower": 2273.411649935253,
+        "median": 2288.278820218493,
+        "upper": 2303.2432156357017
+      },
+      "quote_currency": "USD",
+      "reference_price": 2288.08,
+      "venue": "coinbase"
+    },
+    {
+      "aic": 2689.614281812792,
+      "annualized_volatility": 0.3383869367389952,
+      "base_currency": "ETH",
+      "bic": 2725.405471556465,
+      "conditional_variance": 1.3071429104520633e-05,
+      "conditional_volatility": 0.003615443140822523,
+      "degrees_of_freedom": 2.811564272711426,
+      "forecast_horizon_steps": 1,
+      "forecast_origin": 1793631600,
+      "innovation_distribution": "student_t",
+      "input_sha256": "e4aec0ea533b1b0838997b85dab92ec251eceb9846768383dd23f4b95082d832",
+      "instrument": "ETH-USD",
+      "interval": "1h",
+      "log_likelihood": -1338.807140906396,
+      "mean_log_return": 7.827005661303432e-05,
+      "model": "GJR-GARCH",
+      "model_parameters": {
+        "alpha": 0.29819940422601343,
+        "beta": 0.6964033803168399,
+        "gamma": 0.008794430914293353,
+        "mu": 0.007827005661303432,
+        "nu": 2.811564272711426,
+        "omega": 0.027734990178325477
+      },
+      "observations": 2879,
+      "price_quantiles": {
+        "confidence": 0.95,
+        "lower": 2273.6090388730327,
+        "median": 2288.259095159938,
+        "upper": 2303.003549448232
+      },
+      "quote_currency": "USD",
+      "reference_price": 2288.08,
+      "venue": "coinbase"
+    },
+    {
+      "aic": 653.2063102933266,
+      "annualized_volatility": 0.341464415396605,
+      "base_currency": "ETH",
+      "bic": 676.0956170819319,
+      "conditional_variance": 1.331026792033621e-05,
+      "conditional_volatility": 0.003648323987851985,
+      "degrees_of_freedom": 2.770252944833883,
+      "forecast_horizon_steps": 1,
+      "forecast_origin": 1793631600,
+      "innovation_distribution": "student_t",
+      "input_sha256": "d3fe043c3e9413881cd2c9c8259e84e8ddd8c33fa76de32cbf7e21aaa61588a7",
+      "instrument": "XETHZUSD",
+      "interval": "1h",
+      "log_likelihood": -321.6031551466633,
+      "mean_log_return": 9.209968046919202e-05,
+      "model": "GARCH",
+      "model_parameters": {
+        "alpha": 0.5742829890821756,
+        "beta": 0.42471701091782443,
+        "mu": 0.009209968046919202,
+        "nu": 2.770252944833883,
+        "omega": 0.06642157797716725
       },
       "observations": 719,
       "price_quantiles": {
         "confidence": 0.95,
-        "lower": 2274.1409781112143,
-        "median": 2288.1298413742197,
-        "upper": 2302.2047539619048
+        "lower": 2273.4885187601435,
+        "median": 2288.1307264047073,
+        "upper": 2302.8672359306915
       },
       "quote_currency": "USD",
       "reference_price": 2287.92,
       "venue": "kraken"
     },
     {
-      "aic": 654.4861542109627,
-      "annualized_volatility": 0.33938671653934177,
+      "aic": 653.9032786579313,
+      "annualized_volatility": 0.3266829174428336,
       "base_currency": "ETH",
-      "bic": 681.9533223572889,
-      "conditional_variance": 1.3148783488967525e-05,
-      "conditional_volatility": 0.0036261251342124866,
-      "degrees_of_freedom": 2.758149177485427,
+      "bic": 681.3704468042575,
+      "conditional_variance": 1.2182845724767263e-05,
+      "conditional_volatility": 0.0034903933481439113,
+      "degrees_of_freedom": 2.763966647822036,
       "forecast_horizon_steps": 1,
       "forecast_origin": 1793631600,
       "innovation_distribution": "student_t",
-      "input_sha256": "f9ce81c1dcf22cc69c989c7b863c53ab8e7ffc30625ff5acc1c8a3984f24f879",
+      "input_sha256": "d3fe043c3e9413881cd2c9c8259e84e8ddd8c33fa76de32cbf7e21aaa61588a7",
       "instrument": "XETHZUSD",
       "interval": "1h",
-      "log_likelihood": -321.24307710548135,
-      "mean_log_return": 7.246665094366897e-05,
-      "model": "GJR-GARCH",
+      "log_likelihood": -320.95163932896565,
+      "mean_log_return": 9.171423920645218e-05,
+      "model": "EGARCH",
       "model_parameters": {
-        "alpha": 0.46977175842751895,
-        "beta": 0.4355264506007119,
-        "gamma": 0.1874035819435383,
-        "mu": 0.0072466650943668965,
-        "nu": 2.758149177485427,
-        "omega": 0.0653503043429209
+        "alpha": 0.6298767957762264,
+        "beta": 0.7924626310240789,
+        "gamma": -0.05010434558255909,
+        "mu": 0.009171423920645218,
+        "nu": 2.763966647822036,
+        "omega": -0.294188292447893
       },
       "observations": 719,
       "price_quantiles": {
         "confidence": 0.95,
-        "lower": 2273.575840730681,
-        "median": 2288.0858039075815,
-        "upper": 2302.6883696832706
+        "lower": 2274.1409763477363,
+        "median": 2288.129844464881,
+        "upper": 2302.204761966489
+      },
+      "quote_currency": "USD",
+      "reference_price": 2287.92,
+      "venue": "kraken"
+    },
+    {
+      "aic": 654.486154210802,
+      "annualized_volatility": 0.33938698515366283,
+      "base_currency": "ETH",
+      "bic": 681.9533223571283,
+      "conditional_variance": 1.3148804302704631e-05,
+      "conditional_volatility": 0.003626128004180855,
+      "degrees_of_freedom": 2.7581477261260954,
+      "forecast_horizon_steps": 1,
+      "forecast_origin": 1793631600,
+      "innovation_distribution": "student_t",
+      "input_sha256": "d3fe043c3e9413881cd2c9c8259e84e8ddd8c33fa76de32cbf7e21aaa61588a7",
+      "instrument": "XETHZUSD",
+      "interval": "1h",
+      "log_likelihood": -321.243077105401,
+      "mean_log_return": 7.246665903039474e-05,
+      "model": "GJR-GARCH",
+      "model_parameters": {
+        "alpha": 0.46977186951270483,
+        "beta": 0.4355263032054088,
+        "gamma": 0.18740365456377267,
+        "mu": 0.007246665903039475,
+        "nu": 2.7581477261260954,
+        "omega": 0.06535044011918775
+      },
+      "observations": 719,
+      "price_quantiles": {
+        "confidence": 0.95,
+        "lower": 2273.575834544857,
+        "median": 2288.0858039260847,
+        "upper": 2302.6883759855446
       },
       "quote_currency": "USD",
       "reference_price": 2287.92,
       "venue": "kraken"
     }
   ],
-  "generated_at": "2026-11-02T15:10:32.918046Z",
-  "generated_at_epoch": 1793632232,
+  "generated_at": "2026-11-02T15:16:22.512674Z",
+  "generated_at_epoch": 1793632582,
   "instrument": "ETH/USD",
   "methodology": {
     "confidence_level": 0.95,
@@ -130,6 +235,555 @@
   "sources": [
     {
       "base_currency": "ETH",
+      "endpoint": "https://api.exchange.coinbase.com/products/ETH-USD/candles",
+      "finalized_count": 2880,
+      "interval": "1h",
+      "latest_finalized_candle": {
+        "base_currency": "ETH",
+        "canonical_timestamp_semantics": "BAR_END_EXCLUSIVE",
+        "close": 2288.08,
+        "event_time": 1793631600,
+        "high": 2293.3,
+        "ingested_at": 1793632567,
+        "instrument": "ETH-USD",
+        "interval": "1h",
+        "is_final": true,
+        "low": 2279.6,
+        "open": 2283.57,
+        "quote_currency": "USD",
+        "source_bar_timestamp": 1793628000,
+        "source_payload_sha256": "e95d514305ebb89103d28be8cc877747f4bf663b18af60c956af4a1484f3f8f4",
+        "source_timestamp_semantics": "BAR_START",
+        "trade_count": null,
+        "venue": "coinbase",
+        "volume": 7260.46209333
+      },
+      "price_history": [
+        {
+          "close": 2223.72,
+          "event_time": 1793376000,
+          "high": 2258.64,
+          "low": 2218.07,
+          "volume": 13727.43203711
+        },
+        {
+          "close": 2229.61,
+          "event_time": 1793379600,
+          "high": 2236.2,
+          "low": 2213.98,
+          "volume": 9872.1893713
+        },
+        {
+          "close": 2240.36,
+          "event_time": 1793383200,
+          "high": 2243.99,
+          "low": 2229.29,
+          "volume": 8205.4637194
+        },
+        {
+          "close": 2228.48,
+          "event_time": 1793386800,
+          "high": 2243.16,
+          "low": 2216.0,
+          "volume": 11793.36751085
+        },
+        {
+          "close": 2235.03,
+          "event_time": 1793390400,
+          "high": 2238.68,
+          "low": 2218.24,
+          "volume": 8265.04886984
+        },
+        {
+          "close": 2235.4,
+          "event_time": 1793394000,
+          "high": 2242.0,
+          "low": 2232.06,
+          "volume": 4037.90504333
+        },
+        {
+          "close": 2234.3,
+          "event_time": 1793397600,
+          "high": 2242.79,
+          "low": 2230.93,
+          "volume": 3941.75869233
+        },
+        {
+          "close": 2231.94,
+          "event_time": 1793401200,
+          "high": 2240.45,
+          "low": 2228.88,
+          "volume": 2137.77513371
+        },
+        {
+          "close": 2241.07,
+          "event_time": 1793404800,
+          "high": 2243.72,
+          "low": 2231.08,
+          "volume": 2449.33078649
+        },
+        {
+          "close": 2245.39,
+          "event_time": 1793408400,
+          "high": 2247.41,
+          "low": 2240.5,
+          "volume": 3204.32472038
+        },
+        {
+          "close": 2240.54,
+          "event_time": 1793412000,
+          "high": 2248.56,
+          "low": 2238.87,
+          "volume": 1653.9282927
+        },
+        {
+          "close": 2242.55,
+          "event_time": 1793415600,
+          "high": 2244.7,
+          "low": 2238.49,
+          "volume": 1240.28252164
+        },
+        {
+          "close": 2236.48,
+          "event_time": 1793419200,
+          "high": 2243.39,
+          "low": 2235.42,
+          "volume": 1865.06769568
+        },
+        {
+          "close": 2236.09,
+          "event_time": 1793422800,
+          "high": 2239.15,
+          "low": 2233.08,
+          "volume": 1467.14714484
+        },
+        {
+          "close": 2239.05,
+          "event_time": 1793426400,
+          "high": 2239.92,
+          "low": 2235.65,
+          "volume": 1356.3827264
+        },
+        {
+          "close": 2242.42,
+          "event_time": 1793430000,
+          "high": 2245.39,
+          "low": 2238.79,
+          "volume": 1306.73987821
+        },
+        {
+          "close": 2240.67,
+          "event_time": 1793433600,
+          "high": 2244.02,
+          "low": 2238.24,
+          "volume": 1889.86172923
+        },
+        {
+          "close": 2238.57,
+          "event_time": 1793437200,
+          "high": 2243.45,
+          "low": 2235.01,
+          "volume": 1405.66485321
+        },
+        {
+          "close": 2242.33,
+          "event_time": 1793440800,
+          "high": 2243.23,
+          "low": 2238.58,
+          "volume": 732.28567099
+        },
+        {
+          "close": 2241.68,
+          "event_time": 1793444400,
+          "high": 2245.59,
+          "low": 2240.02,
+          "volume": 1537.7375515
+        },
+        {
+          "close": 2245.06,
+          "event_time": 1793448000,
+          "high": 2248.64,
+          "low": 2240.32,
+          "volume": 1173.31299048
+        },
+        {
+          "close": 2249.6,
+          "event_time": 1793451600,
+          "high": 2252.38,
+          "low": 2243.69,
+          "volume": 1189.00287751
+        },
+        {
+          "close": 2248.38,
+          "event_time": 1793455200,
+          "high": 2251.38,
+          "low": 2242.95,
+          "volume": 1344.41212174
+        },
+        {
+          "close": 2243.01,
+          "event_time": 1793458800,
+          "high": 2250.2,
+          "low": 2241.77,
+          "volume": 3395.694231
+        },
+        {
+          "close": 2247.54,
+          "event_time": 1793462400,
+          "high": 2249.0,
+          "low": 2241.01,
+          "volume": 1291.36999713
+        },
+        {
+          "close": 2248.1,
+          "event_time": 1793466000,
+          "high": 2250.59,
+          "low": 2246.93,
+          "volume": 1081.02529215
+        },
+        {
+          "close": 2252.15,
+          "event_time": 1793469600,
+          "high": 2255.72,
+          "low": 2242.65,
+          "volume": 2788.99136952
+        },
+        {
+          "close": 2252.28,
+          "event_time": 1793473200,
+          "high": 2256.13,
+          "low": 2250.99,
+          "volume": 1283.05493537
+        },
+        {
+          "close": 2250.99,
+          "event_time": 1793476800,
+          "high": 2254.0,
+          "low": 2248.68,
+          "volume": 1410.45855415
+        },
+        {
+          "close": 2250.48,
+          "event_time": 1793480400,
+          "high": 2254.08,
+          "low": 2248.17,
+          "volume": 1060.14824368
+        },
+        {
+          "close": 2252.61,
+          "event_time": 1793484000,
+          "high": 2252.76,
+          "low": 2247.68,
+          "volume": 1677.59327768
+        },
+        {
+          "close": 2251.2,
+          "event_time": 1793487600,
+          "high": 2265.0,
+          "low": 2249.19,
+          "volume": 2728.77533794
+        },
+        {
+          "close": 2252.66,
+          "event_time": 1793491200,
+          "high": 2253.99,
+          "low": 2249.65,
+          "volume": 1336.80880303
+        },
+        {
+          "close": 2259.15,
+          "event_time": 1793494800,
+          "high": 2261.1,
+          "low": 2251.17,
+          "volume": 2516.42755556
+        },
+        {
+          "close": 2266.86,
+          "event_time": 1793498400,
+          "high": 2269.19,
+          "low": 2258.77,
+          "volume": 2179.4649445
+        },
+        {
+          "close": 2261.82,
+          "event_time": 1793502000,
+          "high": 2273.0,
+          "low": 2260.83,
+          "volume": 2044.4219873
+        },
+        {
+          "close": 2264.76,
+          "event_time": 1793505600,
+          "high": 2268.63,
+          "low": 2261.43,
+          "volume": 1029.93486216
+        },
+        {
+          "close": 2263.37,
+          "event_time": 1793509200,
+          "high": 2266.45,
+          "low": 2261.35,
+          "volume": 946.63765692
+        },
+        {
+          "close": 2266.86,
+          "event_time": 1793512800,
+          "high": 2266.91,
+          "low": 2261.28,
+          "volume": 804.4803323
+        },
+        {
+          "close": 2266.42,
+          "event_time": 1793516400,
+          "high": 2270.87,
+          "low": 2263.69,
+          "volume": 977.42956848
+        },
+        {
+          "close": 2267.17,
+          "event_time": 1793520000,
+          "high": 2267.24,
+          "low": 2261.65,
+          "volume": 575.27420728
+        },
+        {
+          "close": 2273.25,
+          "event_time": 1793523600,
+          "high": 2274.99,
+          "low": 2264.76,
+          "volume": 1593.37854851
+        },
+        {
+          "close": 2267.42,
+          "event_time": 1793527200,
+          "high": 2274.09,
+          "low": 2264.4,
+          "volume": 1356.2269399
+        },
+        {
+          "close": 2266.93,
+          "event_time": 1793530800,
+          "high": 2270.92,
+          "low": 2265.86,
+          "volume": 770.90240185
+        },
+        {
+          "close": 2267.01,
+          "event_time": 1793534400,
+          "high": 2268.8,
+          "low": 2263.21,
+          "volume": 1273.87053649
+        },
+        {
+          "close": 2258.71,
+          "event_time": 1793538000,
+          "high": 2267.72,
+          "low": 2251.56,
+          "volume": 2840.85705538
+        },
+        {
+          "close": 2264.75,
+          "event_time": 1793541600,
+          "high": 2265.68,
+          "low": 2258.58,
+          "volume": 1526.20654262
+        },
+        {
+          "close": 2268.62,
+          "event_time": 1793545200,
+          "high": 2270.09,
+          "low": 2262.06,
+          "volume": 2194.74854281
+        },
+        {
+          "close": 2263.81,
+          "event_time": 1793548800,
+          "high": 2269.84,
+          "low": 2263.25,
+          "volume": 1740.20071272
+        },
+        {
+          "close": 2266.79,
+          "event_time": 1793552400,
+          "high": 2269.25,
+          "low": 2262.9,
+          "volume": 1099.96989299
+        },
+        {
+          "close": 2261.78,
+          "event_time": 1793556000,
+          "high": 2268.18,
+          "low": 2260.17,
+          "volume": 843.53163003
+        },
+        {
+          "close": 2260.55,
+          "event_time": 1793559600,
+          "high": 2264.41,
+          "low": 2259.91,
+          "volume": 976.68939352
+        },
+        {
+          "close": 2256.43,
+          "event_time": 1793563200,
+          "high": 2261.44,
+          "low": 2251.48,
+          "volume": 994.9308475
+        },
+        {
+          "close": 2261.03,
+          "event_time": 1793566800,
+          "high": 2261.71,
+          "low": 2251.17,
+          "volume": 817.72017688
+        },
+        {
+          "close": 2261.39,
+          "event_time": 1793570400,
+          "high": 2264.65,
+          "low": 2258.7,
+          "volume": 1638.80620637
+        },
+        {
+          "close": 2257.06,
+          "event_time": 1793574000,
+          "high": 2262.37,
+          "low": 2245.34,
+          "volume": 2682.01596375
+        },
+        {
+          "close": 2272.23,
+          "event_time": 1793577600,
+          "high": 2275.51,
+          "low": 2256.88,
+          "volume": 3733.27295248
+        },
+        {
+          "close": 2270.4,
+          "event_time": 1793581200,
+          "high": 2280.2,
+          "low": 2265.25,
+          "volume": 3477.88706942
+        },
+        {
+          "close": 2286.92,
+          "event_time": 1793584800,
+          "high": 2295.65,
+          "low": 2269.03,
+          "volume": 4379.38622352
+        },
+        {
+          "close": 2292.37,
+          "event_time": 1793588400,
+          "high": 2295.43,
+          "low": 2285.83,
+          "volume": 2502.60693478
+        },
+        {
+          "close": 2306.05,
+          "event_time": 1793592000,
+          "high": 2314.92,
+          "low": 2291.43,
+          "volume": 5308.06285113
+        },
+        {
+          "close": 2290.1,
+          "event_time": 1793595600,
+          "high": 2307.95,
+          "low": 2288.43,
+          "volume": 3460.2801597
+        },
+        {
+          "close": 2289.15,
+          "event_time": 1793599200,
+          "high": 2293.59,
+          "low": 2283.58,
+          "volume": 2728.91439916
+        },
+        {
+          "close": 2282.6,
+          "event_time": 1793602800,
+          "high": 2289.59,
+          "low": 2279.32,
+          "volume": 1926.31555745
+        },
+        {
+          "close": 2281.7,
+          "event_time": 1793606400,
+          "high": 2286.28,
+          "low": 2275.33,
+          "volume": 2019.69633591
+        },
+        {
+          "close": 2294.67,
+          "event_time": 1793610000,
+          "high": 2301.56,
+          "low": 2281.33,
+          "volume": 3017.1323081
+        },
+        {
+          "close": 2287.87,
+          "event_time": 1793613600,
+          "high": 2298.91,
+          "low": 2284.59,
+          "volume": 4784.89305627
+        },
+        {
+          "close": 2283.54,
+          "event_time": 1793617200,
+          "high": 2287.88,
+          "low": 2282.01,
+          "volume": 2953.73889964
+        },
+        {
+          "close": 2283.43,
+          "event_time": 1793620800,
+          "high": 2285.99,
+          "low": 2279.7,
+          "volume": 2156.69727353
+        },
+        {
+          "close": 2282.4,
+          "event_time": 1793624400,
+          "high": 2293.99,
+          "low": 2276.01,
+          "volume": 4280.82840338
+        },
+        {
+          "close": 2283.59,
+          "event_time": 1793628000,
+          "high": 2300.81,
+          "low": 2273.34,
+          "volume": 6406.18850801
+        },
+        {
+          "close": 2288.08,
+          "event_time": 1793631600,
+          "high": 2293.3,
+          "low": 2279.6,
+          "volume": 7260.46209333
+        }
+      ],
+      "provider": "coinbase",
+      "quote_currency": "USD",
+      "raw_response_sha256": "876efb787d89712ae5b1a4589bdfe7434e610b340fb1741a6204585d9b845079",
+      "requested_end": 1793631600,
+      "requested_instrument": "ETH-USD",
+      "requested_start": 1783263600,
+      "retrieved_at": 1793632567,
+      "returned_instrument": "ETH-USD",
+      "row_count": 2880,
+      "series_audit": {
+        "duplicate_event_times": [],
+        "out_of_order_indices": [],
+        "structurally_valid": true,
+        "unobserved_intervals": []
+      },
+      "source_documentation": "https://docs.cdp.coinbase.com/api-reference/exchange-api/rest-api/products/get-product-candles",
+      "status": "succeeded"
+    },
+    {
+      "base_currency": "ETH",
       "endpoint": "https://api.kraken.com/0/public/OHLC",
       "finalized_count": 720,
       "interval": "1h",
@@ -139,7 +793,7 @@
         "close": 2287.92,
         "event_time": 1793631600,
         "high": 2292.81,
-        "ingested_at": 1793632231,
+        "ingested_at": 1793632569,
         "instrument": "XETHZUSD",
         "interval": "1h",
         "is_final": true,
@@ -661,11 +1315,11 @@
       ],
       "provider": "kraken",
       "quote_currency": "USD",
-      "raw_response_sha256": "8734a9365ffe76257e4a4dc9c58a6e7822431f51d9f36df415c6920f82299733",
+      "raw_response_sha256": "90a787714c4bd52bbe39b5bce36d8f12f3ce22313d9eb51085aafe620dfffd38",
       "requested_end": null,
       "requested_instrument": "ETHUSD",
       "requested_start": null,
-      "retrieved_at": 1793632231,
+      "retrieved_at": 1793632569,
       "returned_instrument": "XETHZUSD",
       "row_count": 721,
       "series_audit": {
@@ -678,5 +1332,5 @@
       "status": "succeeded"
     }
   ],
-  "status": "partial"
+  "status": "succeeded"
 }
