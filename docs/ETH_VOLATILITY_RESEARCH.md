@@ -177,3 +177,22 @@ The provider endpoints have not yet been executed from this environment. This
 does not establish live-market connectivity, independently validated ETH/USD
 forecast accuracy, scheduled execution, forecast API or deployment. Those
 remain separate acceptance gates.
+
+
+## 24-hour ETH/USD scenario update
+
+The hourly forecasting pipeline now adds a 24-step conditional path simulation for each fitted GARCH, EGARCH and GJR-GARCH model. Each scenario uses 20,000 simulated paths and a fixed seed for reproducibility. The original one-hour conditional variance and interval are retained for continuity.
+
+The published snapshot includes a separate `price_quantiles_24h` object per venue and model. The dashboard currently uses Coinbase as the primary display feed when available and shows the outer envelope across its three model ranges. It does not average exchange prices.
+
+### Validation status
+
+- The source snapshot generated on 2026-11-02 at 17:19:23 UTC contains six 24-hour model scenarios from Coinbase and Kraken.
+- All six lower / median / upper triples are finite and strictly ordered.
+- The source snapshot status is `succeeded` with no recorded source or model errors.
+- Quant research workflow run 41489973252 passed the unit and import checks after the horizon implementation.
+- Snapshot workflow run 41489973161 completed successfully and published the six scenarios.
+
+### Interpretation boundary
+
+Each model's 95% interval is conditional on the fitted model and sampled historical data. The dashboard's combined low-to-high envelope takes the lowest lower bound and highest upper bound across models. That combined envelope is not itself a calibrated 95% probability interval. Rolling out-of-sample coverage, interval calibration, and comparative model selection remain open research gates. The scenarios are not directional trading signals.
