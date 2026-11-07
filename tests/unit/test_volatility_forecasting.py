@@ -56,6 +56,23 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     else:
         assert np.isfinite(horizon.expected_cumulative_variance)
         assert horizon.expected_cumulative_variance > 0.0
+        if model in ("GARCH", "GJR-GARCH"):
+            expected_h = next_period_variance(fitted) * 10_000.0
+            expected_total = 0.0
+            for _ in range(24):
+                expected_total += expected_h
+                if model == "GARCH":
+                    persistence = fitted.parameters["alpha"] + fitted.parameters["beta"]
+                else:
+                    persistence = (
+                        fitted.parameters["alpha"]
+                        + 0.5 * fitted.parameters["gamma"]
+                        + fitted.parameters["beta"]
+                    )
+                expected_h = fitted.parameters["omega"] + persistence * expected_h
+            assert horizon.expected_cumulative_variance == pytest.approx(
+                expected_total / 10_000.0, rel=1e-12
+            )
     assert horizon.simulations == 4_000
     assert horizon.conditional_volatility > 0.0
     assert horizon.conditional_volatility < 1.0
