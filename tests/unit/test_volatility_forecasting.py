@@ -162,6 +162,23 @@ def test_har_rv_forecast_uses_daily_weekly_and_monthly_features() -> None:
     daily_rv = np.exp(rng.normal(-8.0, 0.25, size=120))
     forecast = har_rv_forecast(daily_rv)
 
+    log_vol = 0.5 * np.log(daily_rv)
+    rows = []
+    targets = []
+    for index in range(22, log_vol.size):
+        prior = log_vol[:index]
+        rows.append([
+            1.0, prior[-1], np.mean(prior[-5:]), np.mean(prior[-22:])
+        ])
+        targets.append(log_vol[index])
+    design = np.asarray(rows)
+    target = np.asarray(targets)
+    coefficients, _, _, _ = np.linalg.lstsq(design, target, rcond=None)
+    latest = np.array([1.0, log_vol[-1], np.mean(log_vol[-5:]), np.mean(log_vol[-22:])])
+    geometric_variance = np.exp(2.0 * float(latest @ coefficients))
+
+    assert forecast.forecast_variance >= geometric_variance
+    assert forecast.forecast_volatility**2 == pytest.approx(forecast.forecast_variance)
     assert forecast.forecast_variance > 0.0
     assert forecast.forecast_volatility > 0.0
     assert len(forecast.coefficients) == 4
