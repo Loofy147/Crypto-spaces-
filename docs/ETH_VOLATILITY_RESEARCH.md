@@ -208,6 +208,17 @@ The model's lower and upper price quantiles still retain tail outcomes; this
 median-path summary is only a descriptive volatility metric, not a replacement
 for the scenario interval.
 
+### Expected 24-hour variance and finite-moment handling
+
+The horizon simulator now distinguishes path simulation from expected-variance estimation:
+
+- GARCH and GJR-GARCH use their exact conditional expected-variance recursions. This avoids relying on a noisy Monte Carlo sample mean when Student-t shocks have finite variance but may have no finite fourth moment.
+- EGARCH with Gaussian innovations uses a closed-form normal moment-generating calculation for expected cumulative variance.
+- EGARCH with Student-t innovations and non-zero exponential asymmetry terms has no finite expected variance because the Student-t distribution has no moment-generating function. Its expected-variance field is explicitly null. Its simulated price quantiles and median-path movement summary remain available and are evaluated separately.
+- The dashboard price quantiles are still generated from the path simulations; these expected-variance calculations do not change the range display.
+
+This distinction prevents a finite Monte Carlo sample average from being presented as a mathematical expectation when the expectation does not exist.
+
 ### Updated operational status
 
 The feature-branch GitHub workflows have successfully fetched public Coinbase
