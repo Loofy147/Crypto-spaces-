@@ -1,6 +1,6 @@
 {
   "arch_interval_coverage": {
-    "EGARCH": {
+    "EGARCH-student_t": {
       "average_width_pct_of_spot": 11.139054114516815,
       "empirical_coverage": 0.9,
       "nominal": 0.95,
@@ -25,10 +25,10 @@
     "interval": "1h",
     "provider": "coinbase",
     "quote_currency": "USD",
-    "raw_response_sha256": "8140bcf6b6731051a88458d5c96a1d7c3306f59e27e8a6744c3528a7b2df6d39",
+    "raw_response_sha256": "48598e6be5eee8a1872754e0692e496a89de17f60b628c3959c1f06b7f5b57f3",
     "requested_end": 1794013200,
     "requested_start": 1783213200,
-    "retrieved_at": 1794013308,
+    "retrieved_at": 1794014161,
     "series_audit": {
       "duplicate_event_times": [],
       "out_of_order_indices": [],
@@ -41,6 +41,8 @@
     "completed_test_origins": 30,
     "dm_benchmark": "GARCH QLIKE",
     "dm_hac_lags": 5,
+    "egarch_interval_distribution": "student_t; interval-only, no expected-variance score",
+    "egarch_variance_distribution": "normal; Student-t expected variance is undefined for exponential EGARCH recursion",
     "forecast_horizon_hours": 24,
     "multiple_testing_adjustment": "Holm-Bonferroni across six candidate comparisons",
     "origin_frequency": "daily UTC boundary; targets do not overlap",
@@ -50,59 +52,59 @@
     "variance_target": "sum of squared finalized hourly log returns over the following 24 hours"
   },
   "dm_tests_vs_garch": {
-    "EGARCH": {
-      "candidate_better_on_mean_loss": false,
-      "dm_statistic": 7.214669148419908,
+    "EGARCH-normal": {
+      "candidate_better_on_mean_loss": true,
+      "dm_statistic": -4.549943468072979,
       "hac_lags": 5,
-      "holm_adjusted_p_value": 3.643759284167493e-07,
-      "mean_qlike_difference_candidate_minus_garch": 8.603875753828593,
+      "holm_adjusted_p_value": 0.0005306321964547961,
+      "mean_qlike_difference_candidate_minus_garch": -0.2552432233526592,
       "observations": 30,
-      "p_value": 6.072932140279155e-08
+      "p_value": 8.843869940913268e-05
     },
     "EWMA-hourly": {
-      "candidate_better_on_mean_loss": false,
-      "dm_statistic": 0.7096843832849438,
+      "candidate_better_on_mean_loss": true,
+      "dm_statistic": -0.1488302967627911,
       "hac_lags": 5,
       "holm_adjusted_p_value": 1.0,
-      "mean_qlike_difference_candidate_minus_garch": 0.076753637950693,
+      "mean_qlike_difference_candidate_minus_garch": -0.019304055991620106,
       "observations": 30,
-      "p_value": 0.48356750785286284
+      "p_value": 0.8827176788978439
     },
     "GJR-GARCH": {
       "candidate_better_on_mean_loss": false,
-      "dm_statistic": 0.907146996627733,
+      "dm_statistic": 0.18805832909286188,
       "hac_lags": 5,
       "holm_adjusted_p_value": 1.0,
-      "mean_qlike_difference_candidate_minus_garch": 3.3536656084039627e-07,
+      "mean_qlike_difference_candidate_minus_garch": 3.23698867932265e-08,
       "observations": 30,
-      "p_value": 0.371805641117847
+      "p_value": 0.8521406722763434
     },
     "HAR-RV": {
       "candidate_better_on_mean_loss": true,
-      "dm_statistic": -1.4424914545517096,
+      "dm_statistic": -2.1082789469723386,
       "hac_lags": 5,
-      "holm_adjusted_p_value": 0.639512622384794,
-      "mean_qlike_difference_candidate_minus_garch": -0.12386721427261052,
+      "holm_adjusted_p_value": 0.2059705252619366,
+      "mean_qlike_difference_candidate_minus_garch": -0.21992490821492366,
       "observations": 30,
-      "p_value": 0.1598781555961985
+      "p_value": 0.04376462698800924
     },
     "HAR-RV+downside": {
       "candidate_better_on_mean_loss": true,
-      "dm_statistic": -0.4235083345460664,
+      "dm_statistic": -1.1591661812920098,
       "hac_lags": 5,
-      "holm_adjusted_p_value": 1.0,
-      "mean_qlike_difference_candidate_minus_garch": -0.041876462337284655,
+      "holm_adjusted_p_value": 0.767533119186327,
+      "mean_qlike_difference_candidate_minus_garch": -0.13793415627959774,
       "observations": 30,
-      "p_value": 0.6750490331732598
+      "p_value": 0.255844373062109
     },
     "Rolling-RV-22d": {
       "candidate_better_on_mean_loss": true,
-      "dm_statistic": -1.7757857424799735,
+      "dm_statistic": -2.1366199563494215,
       "hac_lags": 5,
-      "holm_adjusted_p_value": 0.43131961470405294,
-      "mean_qlike_difference_candidate_minus_garch": -0.14333794550710807,
+      "holm_adjusted_p_value": 0.2059705252619366,
+      "mean_qlike_difference_candidate_minus_garch": -0.23939563944942116,
       "observations": 30,
-      "p_value": 0.08626392294081059
+      "p_value": 0.04119410505238732
     }
   },
   "experiment": "eth_usd_rolling_24h_realized_variance",
@@ -110,16 +112,16 @@
     {
       "complete_history_days": 94,
       "forecasts": {
-        "EGARCH": 1.0904662118259643,
+        "EGARCH-normal": 0.0006675676701439378,
         "EWMA-hourly": 0.000397764369242409,
-        "GARCH": 0.0007047172874844126,
-        "GJR-GARCH": 0.0007047172263739545,
+        "GARCH": 0.0007576644544965951,
+        "GJR-GARCH": 0.0007576642422845577,
         "HAR-RV": 0.0004201024008505446,
         "HAR-RV+downside": 0.0005317995033078497,
         "Rolling-RV-22d": 0.0004006245699378253
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2451.1315047279345,
           "realized_close": 2472.89,
@@ -151,16 +153,16 @@
     {
       "complete_history_days": 95,
       "forecasts": {
-        "EGARCH": 0.010716677290703478,
+        "EGARCH-normal": 0.0010331217508936217,
         "EWMA-hourly": 0.0018139379295547707,
-        "GARCH": 0.0017428574683423037,
-        "GJR-GARCH": 0.0017428477044861598,
+        "GARCH": 0.002165727709456436,
+        "GJR-GARCH": 0.0021657197043233084,
         "HAR-RV": 0.0006188226591154313,
         "HAR-RV+downside": 0.0005675844839658637,
         "Rolling-RV-22d": 0.0004731459175720309
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2339.1745938701342,
           "realized_close": 2485.23,
@@ -192,16 +194,16 @@
     {
       "complete_history_days": 96,
       "forecasts": {
-        "EGARCH": 576787.9134420455,
+        "EGARCH-normal": 0.0006406799762074766,
         "EWMA-hourly": 0.000522939025735618,
-        "GARCH": 0.0007631503896511444,
-        "GJR-GARCH": 0.0007631589325491439,
+        "GARCH": 0.0007659126650685839,
+        "GJR-GARCH": 0.0007659177307349833,
         "HAR-RV": 0.00027538082021425967,
         "HAR-RV+downside": 0.00016782392021685445,
         "Rolling-RV-22d": 0.0004730125630446193
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2385.5172169478974,
           "realized_close": 2503.86,
@@ -233,16 +235,16 @@
     {
       "complete_history_days": 97,
       "forecasts": {
-        "EGARCH": 0.0061953028106345506,
+        "EGARCH-normal": 0.0005432815927669031,
         "EWMA-hourly": 0.00015813135606599916,
-        "GARCH": 0.0005379023119411717,
-        "GJR-GARCH": 0.0005379007099163457,
+        "GARCH": 0.0006235898208861156,
+        "GJR-GARCH": 0.0006235881277466286,
         "HAR-RV": 0.00018982015266197382,
         "HAR-RV+downside": 0.00012362874233652084,
         "Rolling-RV-22d": 0.0004372388830300255
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2406.079845913166,
           "realized_close": 2534.22,
@@ -274,16 +276,16 @@
     {
       "complete_history_days": 98,
       "forecasts": {
-        "EGARCH": 41.23797364302819,
+        "EGARCH-normal": 0.0007384952290181754,
         "EWMA-hourly": 0.00024193663762644838,
-        "GARCH": 0.000786298160293252,
-        "GJR-GARCH": 0.0007862975086394644,
+        "GARCH": 0.0008205915867508991,
+        "GJR-GARCH": 0.000820591006398766,
         "HAR-RV": 0.00031127968736508214,
         "HAR-RV+downside": 0.0002231664829394344,
         "Rolling-RV-22d": 0.00044017038439241393
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2440.3174950231837,
           "realized_close": 2444.3,
@@ -315,16 +317,16 @@
     {
       "complete_history_days": 99,
       "forecasts": {
-        "EGARCH": 1.3820385932581256,
+        "EGARCH-normal": 0.0010128579818210644,
         "EWMA-hourly": 0.0006430871976023615,
-        "GARCH": 0.0015002208551099837,
-        "GJR-GARCH": 0.0015002218530765225,
+        "GARCH": 0.0018827816047530498,
+        "GJR-GARCH": 0.0018827824364905112,
         "HAR-RV": 0.0004126585626934717,
         "HAR-RV+downside": 0.0003478357194200728,
         "Rolling-RV-22d": 0.0004370266498213678
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2324.558572464543,
           "realized_close": 2495.83,
@@ -356,16 +358,16 @@
     {
       "complete_history_days": 100,
       "forecasts": {
-        "EGARCH": 584895.7053911621,
+        "EGARCH-normal": 0.0006760688767384129,
         "EWMA-hourly": 0.0005310701787831426,
-        "GARCH": 0.0010616791304221837,
-        "GJR-GARCH": 0.001061677982682307,
+        "GARCH": 0.0008334378001545469,
+        "GJR-GARCH": 0.0008334393179032475,
         "HAR-RV": 0.00046776748437837363,
         "HAR-RV+downside": 0.0004449651705746487,
         "Rolling-RV-22d": 0.000426017719845808
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2390.9786444361466,
           "realized_close": 2418.66,
@@ -397,16 +399,16 @@
     {
       "complete_history_days": 101,
       "forecasts": {
-        "EGARCH": 0.013062544264898241,
+        "EGARCH-normal": 0.0007086546713061894,
         "EWMA-hourly": 0.0005327442142519358,
-        "GARCH": 0.0007204621695520617,
-        "GJR-GARCH": 0.0007204616403146957,
+        "GARCH": 0.0009081643139761549,
+        "GJR-GARCH": 0.0009081637258249866,
         "HAR-RV": 0.0004070915449379678,
         "HAR-RV+downside": 0.0004054090487929209,
         "Rolling-RV-22d": 0.00043817028539225203
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2304.318844610992,
           "realized_close": 2439.45,
@@ -438,16 +440,16 @@
     {
       "complete_history_days": 102,
       "forecasts": {
-        "EGARCH": 0.03957069130025853,
+        "EGARCH-normal": 0.0010052480286397182,
         "EWMA-hourly": 0.0013321483167126273,
-        "GARCH": 0.0010778915486850263,
-        "GJR-GARCH": 0.0010778902903836886,
+        "GARCH": 0.001402879754822331,
+        "GJR-GARCH": 0.0014028772248045743,
         "HAR-RV": 0.0006076316140793103,
         "HAR-RV+downside": 0.0004440002176904906,
         "Rolling-RV-22d": 0.0004945094162404508
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2312.971563597908,
           "realized_close": 2419.92,
@@ -479,16 +481,16 @@
     {
       "complete_history_days": 103,
       "forecasts": {
-        "EGARCH": 9.621326963632338,
+        "EGARCH-normal": 0.0007499204670754959,
         "EWMA-hourly": 0.000616777909084604,
-        "GARCH": 0.0008411812142934413,
-        "GJR-GARCH": 0.0008411809560570918,
+        "GARCH": 0.0010357095760354777,
+        "GJR-GARCH": 0.0010357094071214807,
         "HAR-RV": 0.0003843798966048812,
         "HAR-RV+downside": 0.000262735889707016,
         "Rolling-RV-22d": 0.00048700216830094685
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2305.4646584794464,
           "realized_close": 2399.68,
@@ -520,16 +522,16 @@
     {
       "complete_history_days": 104,
       "forecasts": {
-        "EGARCH": 3.435266696305618,
+        "EGARCH-normal": 0.001095389784213994,
         "EWMA-hourly": 0.0006598625364103757,
-        "GARCH": 0.001845343902830355,
-        "GJR-GARCH": 0.0018453413200788756,
+        "GARCH": 0.0021024870904701267,
+        "GJR-GARCH": 0.0021024870618135657,
         "HAR-RV": 0.00040026206019242306,
         "HAR-RV+downside": 0.0002822316037032021,
         "Rolling-RV-22d": 0.0004964827446514015
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2266.7367050574226,
           "realized_close": 2407.51,
@@ -561,16 +563,16 @@
     {
       "complete_history_days": 105,
       "forecasts": {
-        "EGARCH": 0.0162682520777805,
+        "EGARCH-normal": 0.0014069826526432539,
         "EWMA-hourly": 0.0008543948703865716,
-        "GARCH": 0.0025778186135571026,
-        "GJR-GARCH": 0.002577841252481726,
+        "GARCH": 0.0022692296834483394,
+        "GJR-GARCH": 0.0022692314595642218,
         "HAR-RV": 0.0004360655799468684,
         "HAR-RV+downside": 0.000242292904546732,
         "Rolling-RV-22d": 0.0005244012206095386
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2266.405981832119,
           "realized_close": 2405.08,
@@ -602,16 +604,16 @@
     {
       "complete_history_days": 106,
       "forecasts": {
-        "EGARCH": 67.47567067893625,
+        "EGARCH-normal": 0.0006762407789583834,
         "EWMA-hourly": 0.00039376328572540627,
-        "GARCH": 0.0008445610981965444,
-        "GJR-GARCH": 0.0008445599948588633,
+        "GARCH": 0.0010006371227226374,
+        "GJR-GARCH": 0.0010006355437149805,
         "HAR-RV": 0.0003307581680387509,
         "HAR-RV+downside": 0.00023115370778943326,
         "Rolling-RV-22d": 0.0005275188580267337
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2293.7517943544453,
           "realized_close": 2446.62,
@@ -643,16 +645,16 @@
     {
       "complete_history_days": 107,
       "forecasts": {
-        "EGARCH": 0.05550665340055842,
+        "EGARCH-normal": 0.0009343574487891182,
         "EWMA-hourly": 0.0009447776025555976,
-        "GARCH": 0.0009717456562389113,
-        "GJR-GARCH": 0.0009717483770290866,
+        "GARCH": 0.0014108589268946804,
+        "GJR-GARCH": 0.0014108617404821108,
         "HAR-RV": 0.000488679590451922,
         "HAR-RV+downside": 0.0002695820364320918,
         "Rolling-RV-22d": 0.0005525633385363477
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2321.4165009200606,
           "realized_close": 2471.78,
@@ -684,16 +686,16 @@
     {
       "complete_history_days": 108,
       "forecasts": {
-        "EGARCH": 0.04474767574101716,
+        "EGARCH-normal": 0.0008765241234995937,
         "EWMA-hourly": 0.0005252727837128227,
-        "GARCH": 0.0011748271528090979,
-        "GJR-GARCH": 0.0011748275139800458,
+        "GARCH": 0.0015034573054690855,
+        "GJR-GARCH": 0.001503457541919693,
         "HAR-RV": 0.0003701566561825838,
         "HAR-RV+downside": 0.0002975009452071593,
         "Rolling-RV-22d": 0.0005421761946492385
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2342.77194089452,
           "realized_close": 2385.86,
@@ -725,16 +727,16 @@
     {
       "complete_history_days": 109,
       "forecasts": {
-        "EGARCH": 0.7007684014693106,
+        "EGARCH-normal": 0.0007809437157856523,
         "EWMA-hourly": 0.00036610464932974375,
-        "GARCH": 0.001056198073205669,
-        "GJR-GARCH": 0.0010562003343636578,
+        "GARCH": 0.0013203991687995313,
+        "GJR-GARCH": 0.0013203993521719204,
         "HAR-RV": 0.00039008803152123985,
         "HAR-RV+downside": 0.00039503067665851323,
         "Rolling-RV-22d": 0.0005334472335783989
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2266.929270693144,
           "realized_close": 2384.38,
@@ -766,16 +768,16 @@
     {
       "complete_history_days": 110,
       "forecasts": {
-        "EGARCH": 0.9994980595836003,
+        "EGARCH-normal": 0.0011413677500584595,
         "EWMA-hourly": 0.0005905231166542233,
-        "GARCH": 0.0018722846381102826,
-        "GJR-GARCH": 0.0018722859909743618,
+        "GARCH": 0.0029522995894785864,
+        "GJR-GARCH": 0.002952302280268948,
         "HAR-RV": 0.0004326864306789815,
         "HAR-RV+downside": 0.0003819402494166588,
         "Rolling-RV-22d": 0.0005388592785331106
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2238.320943423908,
           "realized_close": 2355.36,
@@ -807,16 +809,16 @@
     {
       "complete_history_days": 111,
       "forecasts": {
-        "EGARCH": 8872.939437819165,
+        "EGARCH-normal": 0.0009614039200483626,
         "EWMA-hourly": 0.0006178668775287372,
-        "GARCH": 0.0011370553264832422,
-        "GJR-GARCH": 0.0011370566256759084,
+        "GARCH": 0.0017521876782093518,
+        "GJR-GARCH": 0.0017521886689059695,
         "HAR-RV": 0.0004205505938377986,
         "HAR-RV+downside": 0.0003980016799656771,
         "Rolling-RV-22d": 0.0005410127788137106
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2221.9617149890482,
           "realized_close": 2326.75,
@@ -848,16 +850,16 @@
     {
       "complete_history_days": 112,
       "forecasts": {
-        "EGARCH": 15.297637588464676,
+        "EGARCH-normal": 0.0008519091189932455,
         "EWMA-hourly": 0.00039771755796025104,
-        "GARCH": 0.00113314010308067,
-        "GJR-GARCH": 0.0011331387853010238,
+        "GARCH": 0.0017775778202230132,
+        "GJR-GARCH": 0.0017775749351781798,
         "HAR-RV": 0.000369363552049275,
         "HAR-RV+downside": 0.0002928715972506545,
         "Rolling-RV-22d": 0.0005533802513561631
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2191.1521007315846,
           "realized_close": 2320.34,
@@ -889,16 +891,16 @@
     {
       "complete_history_days": 113,
       "forecasts": {
-        "EGARCH": 0.002946070158814617,
+        "EGARCH-normal": 0.0008424307344053835,
         "EWMA-hourly": 0.00045912979221181456,
-        "GARCH": 0.0009874605615715012,
-        "GJR-GARCH": 0.0009874586968762443,
+        "GARCH": 0.0015671956013666442,
+        "GJR-GARCH": 0.0015671923497826894,
         "HAR-RV": 0.0003699987970133358,
         "HAR-RV+downside": 0.00025341089610899926,
         "Rolling-RV-22d": 0.0005690577945784389
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2196.2005149428796,
           "realized_close": 2347.01,
@@ -930,16 +932,16 @@
     {
       "complete_history_days": 114,
       "forecasts": {
-        "EGARCH": 0.0021207792290368443,
+        "EGARCH-normal": 0.0006467870590891057,
         "EWMA-hourly": 0.0002857404604162054,
-        "GARCH": 0.0008957763111372328,
-        "GJR-GARCH": 0.0008957757716364027,
+        "GARCH": 0.0014315638804384965,
+        "GJR-GARCH": 0.0014315630605552633,
         "HAR-RV": 0.0003335653634742786,
         "HAR-RV+downside": 0.000270135035691968,
         "Rolling-RV-22d": 0.000570195963088294
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2240.8712257249786,
           "realized_close": 2356.89,
@@ -971,16 +973,16 @@
     {
       "complete_history_days": 115,
       "forecasts": {
-        "EGARCH": 487.2735692673737,
+        "EGARCH-normal": 0.0007513337385578298,
         "EWMA-hourly": 0.000304945107869134,
-        "GARCH": 0.0010303670777654578,
-        "GJR-GARCH": 0.0010303704511114625,
+        "GARCH": 0.0016194795484451316,
+        "GJR-GARCH": 0.0016194872648860059,
         "HAR-RV": 0.00034962465965653375,
         "HAR-RV+downside": 0.0003243972042342559,
         "Rolling-RV-22d": 0.000576110640930841
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 0.0,
           "lower": 2248.952769855163,
           "realized_close": 2248.34,
@@ -1012,16 +1014,16 @@
     {
       "complete_history_days": 116,
       "forecasts": {
-        "EGARCH": 349.3356603018161,
+        "EGARCH-normal": 0.0014318651535818398,
         "EWMA-hourly": 0.00208032213228554,
-        "GARCH": 0.0031301730913132365,
-        "GJR-GARCH": 0.0031301849063075163,
+        "GARCH": 0.005216060799676297,
+        "GJR-GARCH": 0.005216071497509479,
         "HAR-RV": 0.0004093403126043279,
         "HAR-RV+downside": 0.00038766451619280835,
         "Rolling-RV-22d": 0.000633921593677374
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2091.2945139408453,
           "realized_close": 2241.07,
@@ -1053,16 +1055,16 @@
     {
       "complete_history_days": 117,
       "forecasts": {
-        "EGARCH": 14.104652704080857,
+        "EGARCH-normal": 0.0008178633082142958,
         "EWMA-hourly": 0.0009486647573646622,
-        "GARCH": 0.0011673136744800355,
-        "GJR-GARCH": 0.0011673156581687228,
+        "GARCH": 0.0016018674523183777,
+        "GJR-GARCH": 0.0016018707095846435,
         "HAR-RV": 0.00037640825993115495,
         "HAR-RV+downside": 0.00034179357476173323,
         "Rolling-RV-22d": 0.0005856775847160791
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2135.3982378253654,
           "realized_close": 2252.66,
@@ -1094,16 +1096,16 @@
     {
       "complete_history_days": 118,
       "forecasts": {
-        "EGARCH": 5213.0360697912565,
+        "EGARCH-normal": 0.0005358248597044097,
         "EWMA-hourly": 0.0002448702996170045,
-        "GARCH": 0.0008245779338801429,
-        "GJR-GARCH": 0.0008245781995055632,
+        "GARCH": 0.001209921474898395,
+        "GJR-GARCH": 0.0012099214617794236,
         "HAR-RV": 0.00032631055199486015,
         "HAR-RV+downside": 0.0003306693954469275,
         "Rolling-RV-22d": 0.000580669776466575
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2162.2867976924917,
           "realized_close": 2272.23,
@@ -1135,16 +1137,16 @@
     {
       "complete_history_days": 119,
       "forecasts": {
-        "EGARCH": 26.361313212398485,
+        "EGARCH-normal": 0.0008529849858439222,
         "EWMA-hourly": 0.00018155784377435797,
-        "GARCH": 0.0010013343921312313,
-        "GJR-GARCH": 0.0010013322254074381,
+        "GARCH": 0.0015727270536680488,
+        "GJR-GARCH": 0.0015727230991331442,
         "HAR-RV": 0.00036411047975874636,
         "HAR-RV+downside": 0.00031418159763297866,
         "Rolling-RV-22d": 0.000584473468110963
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2147.523782852331,
           "realized_close": 2249.66,
@@ -1176,16 +1178,16 @@
     {
       "complete_history_days": 120,
       "forecasts": {
-        "EGARCH": 0.06521314852541886,
+        "EGARCH-normal": 0.0007343310620609872,
         "EWMA-hourly": 0.00025409469957324396,
-        "GARCH": 0.0038159118009101277,
-        "GJR-GARCH": 0.003815890960921483,
+        "GARCH": 0.0013034434390069925,
+        "GJR-GARCH": 0.0013034396459944842,
         "HAR-RV": 0.00040831161862818927,
         "HAR-RV+downside": 0.0003841627715860162,
         "Rolling-RV-22d": 0.0005879214278944124
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2138.5472757925118,
           "realized_close": 2271.64,
@@ -1217,16 +1219,16 @@
     {
       "complete_history_days": 121,
       "forecasts": {
-        "EGARCH": 548233.3598204963,
+        "EGARCH-normal": 0.0008244598606044022,
         "EWMA-hourly": 0.0002855956007284754,
-        "GARCH": 0.0014797438456248474,
-        "GJR-GARCH": 0.0014797383778920687,
+        "GARCH": 0.0017621216330724106,
+        "GJR-GARCH": 0.0017621178458151053,
         "HAR-RV": 0.000541775463625791,
         "HAR-RV+downside": 0.0005135350207794264,
         "Rolling-RV-22d": 0.0005726705462659724
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 0.0,
           "lower": 2157.0321260921796,
           "realized_close": 2422.27,
@@ -1258,16 +1260,16 @@
     {
       "complete_history_days": 122,
       "forecasts": {
-        "EGARCH": 583251.2470897236,
+        "EGARCH-normal": 0.0012930548902157963,
         "EWMA-hourly": 0.001414196393055958,
-        "GARCH": 0.001969778807698171,
-        "GJR-GARCH": 0.0019697746762414783,
+        "GARCH": 0.002073113304882696,
+        "GJR-GARCH": 0.0020731113924401727,
         "HAR-RV": 0.0007201696068028053,
         "HAR-RV+downside": 0.0005464609548618224,
         "Rolling-RV-22d": 0.0006142976922214096
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 0.0,
           "lower": 2273.9366140606394,
           "realized_close": 2234.61,
@@ -1299,16 +1301,16 @@
     {
       "complete_history_days": 123,
       "forecasts": {
-        "EGARCH": 547986.32263584,
+        "EGARCH-normal": 0.001208588140367601,
         "EWMA-hourly": 0.002386711931580922,
-        "GARCH": 0.0016486497212837633,
-        "GJR-GARCH": 0.0016486519761154063,
+        "GARCH": 0.0022905783122552626,
+        "GJR-GARCH": 0.002290580524166023,
         "HAR-RV": 0.00041304371929625356,
         "HAR-RV+downside": 0.0005279170073209435,
         "Rolling-RV-22d": 0.0006981462476038573
       },
       "garch_family_intervals": {
-        "EGARCH": {
+        "EGARCH-student_t": {
           "covered": 1.0,
           "lower": 2082.3449643945683,
           "realized_close": 2235.37,
@@ -1338,64 +1340,66 @@
       "training_hourly_returns": 2160
     }
   ],
-  "generated_at": "2026-11-07T01:04:40.661948Z",
+  "generated_at": "2026-11-07T01:20:43.216506Z",
   "interpretation": [
     "This is a preliminary single-venue rolling out-of-sample screen, not a final model selection.",
     "QLIKE, RMSE and MAE score daily realized variance; lower is better.",
     "The downside-HAR challenger uses only prior daily realized variance and downside semivariance.",
+    "EGARCH is scored with Gaussian innovations because expected variance is undefined under Student-t innovations in the exponential EGARCH recursion.",
+    "Student-t EGARCH is retained as an interval-only candidate; its Monte Carlo sample mean is not treated as an expected variance.",
     "GARCH-family intervals are model-conditional and their empirical coverage is not calibrated by this experiment.",
     "The daily origins have non-overlapping 24-hour targets; the DM tests still use a five-day Newey-West HAC estimator.",
     "A model should not be promoted from this short sample without a longer holdout, regime analysis and repeatable results."
   ],
   "schema_version": 1,
   "scorecard": {
-    "EGARCH": {
-      "mae": 95208.63587444728,
-      "mean_forecast_to_realized_ratio": 544817541.3519518,
-      "qlike": 9.22867412507356,
-      "rank_by_qlike": 7,
-      "rmse": 232086.50638611583
+    "EGARCH-normal": {
+      "mae": 0.0006105190807309166,
+      "mean_forecast_to_realized_ratio": 3.142703982101283,
+      "qlike": 0.46561284183462354,
+      "rank_by_qlike": 1,
+      "rmse": 0.0006890319713332842
     },
     "EWMA-hourly": {
       "mae": 0.0006019131835547499,
       "mean_forecast_to_realized_ratio": 2.9056187666524576,
       "qlike": 0.7015520091956626,
-      "rank_by_qlike": 6,
+      "rank_by_qlike": 5,
       "rmse": 0.0008589727510252411
     },
     "GARCH": {
-      "mae": 0.000950627268556452,
-      "mean_forecast_to_realized_ratio": 4.719612318145971,
-      "qlike": 0.6247983712449696,
-      "rank_by_qlike": 4,
-      "rmse": 0.001185902436532212
+      "mae": 0.0011507940013219075,
+      "mean_forecast_to_realized_ratio": 5.612569890702404,
+      "qlike": 0.7208560651872828,
+      "rank_by_qlike": 6,
+      "rmse": 0.001423982980788249
     },
     "GJR-GARCH": {
-      "mae": 0.0009506279492358536,
-      "mean_forecast_to_realized_ratio": 4.719617789533342,
-      "qlike": 0.6247987066115306,
-      "rank_by_qlike": 5,
-      "rmse": 0.001185902410548022
+      "mae": 0.0011507939125852342,
+      "mean_forecast_to_realized_ratio": 5.612573442611059,
+      "qlike": 0.7208560975571695,
+      "rank_by_qlike": 7,
+      "rmse": 0.0014239838407611098
     },
     "HAR-RV": {
       "mae": 0.0004156091938856401,
       "mean_forecast_to_realized_ratio": 1.4401956966387126,
       "qlike": 0.500931156972359,
-      "rank_by_qlike": 2,
+      "rank_by_qlike": 3,
       "rmse": 0.0006469154006890159
     },
     "HAR-RV+downside": {
       "mae": 0.00042222685424759046,
       "mean_forecast_to_realized_ratio": 1.2094196218203739,
       "qlike": 0.5829219089076851,
-      "rank_by_qlike": 3,
+      "rank_by_qlike": 4,
       "rmse": 0.0006651354494581339
     },
     "Rolling-RV-22d": {
       "mae": 0.0004487227925545346,
       "mean_forecast_to_realized_ratio": 2.0410852316102726,
       "qlike": 0.4814604257378616,
-      "rank_by_qlike": 1,
+      "rank_by_qlike": 2,
       "rmse": 0.0006479059101785486
     }
   },
