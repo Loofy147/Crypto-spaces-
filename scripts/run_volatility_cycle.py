@@ -72,6 +72,7 @@ def _forecast_payload(venue: str, candles: tuple, model: str) -> dict:
         "conditional_variance": next_period_variance(fit),
         "conditional_volatility": interval.conditional_volatility,
         "annualized_volatility": interval.annualized_volatility,
+        "expected_variance_24h": horizon.expected_cumulative_variance,
         "conditional_volatility_24h": horizon.conditional_volatility,
         "annualized_volatility_24h": horizon.annualized_volatility,
         "simulation_count_24h": horizon.simulations,
