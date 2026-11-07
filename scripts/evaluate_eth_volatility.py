@@ -442,6 +442,30 @@ def run_backtest(
     for name, value in adjusted.items():
         dm_results[name]["holm_adjusted_p_value"] = value
 
+    pairwise_dm_results: dict[str, Any] = {}
+    pairwise_raw_p_values: dict[str, float] = {}
+    for index, model_a in enumerate(MODEL_NAMES):
+        for model_b in MODEL_NAMES[index + 1:]:
+            key = f"{model_a} vs {model_b}"
+            comparison = _dm_qlike(
+                actual, forecast_arrays[model_a], forecast_arrays[model_b], hac_lags=5
+            )
+            pairwise_dm_results[key] = {
+                "model_a": model_a,
+                "model_b": model_b,
+                "mean_qlike_difference_a_minus_b": comparison[
+                    "mean_qlike_difference_candidate_minus_garch"
+                ],
+                "dm_statistic": comparison["dm_statistic"],
+                "p_value": comparison["p_value"],
+                "observations": comparison["observations"],
+                "hac_lags": comparison["hac_lags"],
+            }
+            pairwise_raw_p_values[key] = comparison["p_value"]
+    pairwise_adjusted = _holm_adjust(pairwise_raw_p_values)
+    for key, value in pairwise_adjusted.items():
+        pairwise_dm_results[key]["holm_adjusted_p_value"] = value
+
     interval_coverage: dict[str, Any] = {}
     for model in INTERVAL_NAMES:
         intervals = [row["garch_family_intervals"][model] for row in rows]
@@ -489,10 +513,11 @@ def run_backtest(
             "common_origin_rule": "all seven candidates must succeed for an origin to be scored",
             "dm_benchmark": "GARCH QLIKE",
             "dm_hac_lags": 5,
-            "multiple_testing_adjustment": "Holm-Bonferroni across six candidate comparisons",
+            "multiple_testing_adjustment": "Holm-Bonferroni across six GARCH-benchmark comparisons and all 21 candidate pairs",
         },
         "scorecard": scorecard,
         "dm_tests_vs_garch": dm_results,
+        "pairwise_dm_tests": pairwise_dm_results,
         "arch_interval_coverage": interval_coverage,
         "forecast_origins": rows,
         "skipped_origins": skipped,
@@ -503,7 +528,8 @@ def run_backtest(
             "EGARCH is scored with Gaussian innovations because expected variance is undefined under Student-t innovations in the exponential EGARCH recursion.",
             "Student-t EGARCH is retained as an interval-only candidate; its Monte Carlo sample mean is not treated as an expected variance.",
             "GARCH-family intervals are model-conditional and their empirical coverage is not calibrated by this experiment.",
-            "The daily origins have non-overlapping 24-hour targets; the DM tests still use a five-day Newey-West HAC estimator.",
+            "The daily origins have non-overlapping 24-hour targets; the DM tests use a five-day Newey-West HAC estimator.",
+            "All 21 pairwise candidate comparisons are reported with Holm-Bonferroni adjusted p-values; this controls multiple testing but does not replace a longer independent holdout or model confidence set.",
             "A model should not be promoted from this short sample without a longer holdout, regime analysis and repeatable results.",
         ],
     }
@@ -549,6 +575,26 @@ def _markdown_report(result: dict[str, Any]) -> str:
             f"{values['dm_statistic']:.3f} | {values['p_value']:.4f} | "
             f"{values['holm_adjusted_p_value']:.4f} |"
         )
+    lines.extend([
+        "",
+        "## All-pairs comparisons (Holm adjusted)",
+        "",
+        "| Model A | Model B | Mean QLIKE difference A − B | DM statistic | p-value | Holm adjusted p |",
+        "|---|---|---:|---:|---:|---:|",
+    ])
+    for values in result["pairwise_dm_tests"].values():
+        lines.append(
+            f"| {values['model_a']} | {values['model_b']} | "
+            f"{values['mean_qlike_difference_a_minus_b']:.6f} | "
+            f"{values['dm_statistic']:.3f} | {values['p_value']:.4f} | "
+            f"{values['holm_adjusted_p_value']:.4f} |"
+        )
+    lines.extend([
+        "",
+        "Negative A − B means model A had lower average QLIKE. Pairwise p-values are Holm-adjusted "
+        "across all 21 comparisons; this is still an exploratory 30-origin, single-venue test.",
+        "",
+    ])
     lines.extend([
         "",
         "Negative mean QLIKE difference means the candidate had lower average loss than GARCH. "
