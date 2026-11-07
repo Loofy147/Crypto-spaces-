@@ -37,9 +37,19 @@ from src.models.volatility_forecasting import (
 
 SECONDS_PER_DAY = 86_400
 HOURS_PER_DAY = 24
-ARCH_MODELS = ("GARCH", "EGARCH", "GJR-GARCH")
+VARIANCE_CONFIG = (
+    ("GARCH", "student_t", "GARCH"),
+    ("EGARCH", "normal", "EGARCH-normal"),
+    ("GJR-GARCH", "student_t", "GJR-GARCH"),
+)
+INTERVAL_CONFIG = (
+    ("GARCH", "student_t", "GARCH"),
+    ("EGARCH", "student_t", "EGARCH-student_t"),
+    ("GJR-GARCH", "student_t", "GJR-GARCH"),
+)
+INTERVAL_NAMES = tuple(item[2] for item in INTERVAL_CONFIG)
 MODEL_NAMES = (
-    "GARCH", "EGARCH", "GJR-GARCH", "HAR-RV",
+    "GARCH", "EGARCH-normal", "GJR-GARCH", "HAR-RV",
     "HAR-RV+downside", "EWMA-hourly", "Rolling-RV-22d",
 )
 
@@ -309,10 +319,21 @@ def run_backtest(
         forecasts: dict[str, float] = {}
         model_intervals: dict[str, dict[str, float]] = {}
         try:
-            for model in ARCH_MODELS:
-                fitted = fit_volatility_model(
-                    train_returns, model=model, distribution="student_t",
-                )
+            # Score expected variance only for distributions with finite moments
+            # under the selected recursion. EGARCH uses Gaussian innovations for
+            # this variance comparison; Student-t EGARCH remains a separate
+            # interval-only model because its exponential variance recursion has
+            # no finite expected variance.
+            fit_cache: dict[tuple[str, str], Any] = {}
+            for model, distribution, _ in VARIANCE_CONFIG + INTERVAL_CONFIG:
+                fit_key = (model, distribution)
+                if fit_key not in fit_cache:
+                    fit_cache[fit_key] = fit_volatility_model(
+                        train_returns, model=model, distribution=distribution,
+                    )
+
+            for model, distribution, forecast_name in VARIANCE_CONFIG:
+                fitted = fit_cache[(model, distribution)]
                 horizon = forecast_price_interval_horizon(
                     fitted,
                     spot_price=float(origin.close),
@@ -322,8 +343,25 @@ def run_backtest(
                     random_seed=origin_seed,
                     periods_per_year=365 * HOURS_PER_DAY,
                 )
-                forecasts[model] = horizon.expected_cumulative_variance
-                model_intervals[model] = {
+                expected_variance = horizon.expected_cumulative_variance
+                if expected_variance is None or not math.isfinite(expected_variance) or expected_variance <= 0.0:
+                    raise FloatingPointError(
+                        f"{forecast_name} has no finite expected 24-hour variance"
+                    )
+                forecasts[forecast_name] = expected_variance
+
+            for model, distribution, interval_name in INTERVAL_CONFIG:
+                fitted = fit_cache[(model, distribution)]
+                horizon = forecast_price_interval_horizon(
+                    fitted,
+                    spot_price=float(origin.close),
+                    horizon_steps=HOURS_PER_DAY,
+                    confidence=0.95,
+                    simulations=simulations,
+                    random_seed=origin_seed,
+                    periods_per_year=365 * HOURS_PER_DAY,
+                )
+                model_intervals[interval_name] = {
                     "lower": horizon.lower_price,
                     "upper": horizon.upper_price,
                     "realized_close": realized_close,
@@ -402,7 +440,7 @@ def run_backtest(
         dm_results[name]["holm_adjusted_p_value"] = value
 
     interval_coverage: dict[str, Any] = {}
-    for model in ARCH_MODELS:
+    for model in INTERVAL_NAMES:
         intervals = [row["garch_family_intervals"][model] for row in rows]
         interval_coverage[model] = {
             "nominal": 0.95,
@@ -442,6 +480,8 @@ def run_backtest(
             "requested_test_origins": test_days,
             "completed_test_origins": len(rows),
             "simulations_per_arch_model_origin": simulations,
+            "egarch_variance_distribution": "normal; Student-t expected variance is undefined for exponential EGARCH recursion",
+            "egarch_interval_distribution": "student_t; interval-only, no expected-variance score",
             "variance_target": "sum of squared finalized hourly log returns over the following 24 hours",
             "common_origin_rule": "all seven candidates must succeed for an origin to be scored",
             "dm_benchmark": "GARCH QLIKE",
@@ -457,6 +497,8 @@ def run_backtest(
             "This is a preliminary single-venue rolling out-of-sample screen, not a final model selection.",
             "QLIKE, RMSE and MAE score daily realized variance; lower is better.",
             "The downside-HAR challenger uses only prior daily realized variance and downside semivariance.",
+            "EGARCH is scored with Gaussian innovations because expected variance is undefined under Student-t innovations in the exponential EGARCH recursion.",
+            "Student-t EGARCH is retained as an interval-only candidate; its Monte Carlo sample mean is not treated as an expected variance.",
             "GARCH-family intervals are model-conditional and their empirical coverage is not calibrated by this experiment.",
             "The daily origins have non-overlapping 24-hour targets; the DM tests still use a five-day Newey-West HAC estimator.",
             "A model should not be promoted from this short sample without a longer holdout, regime analysis and repeatable results.",
