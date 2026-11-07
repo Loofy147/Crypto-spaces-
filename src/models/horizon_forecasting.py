@@ -25,7 +25,7 @@ class HorizonPriceInterval:
     upper_price: float
     horizon_steps: int
     simulations: int
-    expected_cumulative_variance: float
+    expected_cumulative_variance: float | None
     conditional_volatility: float
     annualized_volatility: float
     mean_log_return: float
@@ -129,9 +129,19 @@ def forecast_price_interval_horizon(
     # A few extreme paths can dominate the arithmetic mean under heavy-tailed
     # innovations (especially for EGARCH). The median path standard deviation
     # is a more stable "typical move" summary; price quantiles still retain tails.
-    expected_cumulative_variance = float(np.mean(cumulative_variance_pct2) / 10_000.0)
-    if not np.isfinite(expected_cumulative_variance) or expected_cumulative_variance <= 0.0:
-        raise FloatingPointError("expected cumulative variance is invalid")
+    # A Student-t innovation has no finite moment-generating function. In
+    # EGARCH, non-zero asymmetry terms enter an exponential variance recursion,
+    # so the expected future variance is not finite under Student-t shocks.
+    # Keep path quantiles and the median typical-move summary, but do not expose
+    # the Monte Carlo sample mean as an expected variance for this combination.
+    if fit.model == "EGARCH" and fit.distribution == "student_t" and (
+        abs(parameters["alpha"]) > 1e-12 or abs(parameters["gamma"]) > 1e-12
+    ):
+        expected_cumulative_variance = None
+    else:
+        expected_cumulative_variance = float(np.mean(cumulative_variance_pct2) / 10_000.0)
+        if not np.isfinite(expected_cumulative_variance) or expected_cumulative_variance <= 0.0:
+            raise FloatingPointError("expected cumulative variance is invalid")
     horizon_volatility = float(
         np.median(np.sqrt(cumulative_variance_pct2 / 10_000.0))
     )
