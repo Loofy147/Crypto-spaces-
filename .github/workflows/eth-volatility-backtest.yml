@@ -19,7 +19,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: eth-volatility-backtest-\${{ github.ref }}
+  group: eth-volatility-backtest
   cancel-in-progress: false
 
 jobs:
@@ -86,7 +86,7 @@ jobs:
 
       - name: Publish reproducible report to the research branch
         env:
-          BRANCH_NAME: \${{ github.ref_name }}
+          BRANCH_NAME: feat/eth-volatility-forecasting
         run: |
           mkdir -p /tmp/eth-volatility-backtest
           cp artifacts/research/eth-volatility-backtest/latest.json /tmp/eth-volatility-backtest/latest.json
