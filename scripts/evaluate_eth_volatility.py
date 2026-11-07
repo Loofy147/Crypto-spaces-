@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,6 +17,10 @@ from typing import Any, Sequence
 
 import numpy as np
 from scipy.stats import t as student_t
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from src.data.market_data_providers import CoinbaseExchangeClient
 from src.data.ohlcv_contract import (
