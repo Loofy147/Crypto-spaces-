@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
+from scipy.special import logsumexp
 from scipy.stats import t as student_t
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -137,6 +138,8 @@ def downside_har_variance_forecast(
         x_standard.T @ x_standard + penalty,
         x_standard.T @ (y - y_mean),
     )
+    residuals = y - (y_mean + x_standard @ coefficients)
+    log_smearing = float(logsumexp(2.0 * residuals) - np.log(residuals.size))
 
     latest = np.asarray([
         log_rv[-1],
@@ -148,8 +151,8 @@ def downside_har_variance_forecast(
     predicted_log_volatility = y_mean + float(
         ((latest - x_mean) / x_scale) @ coefficients
     )
-    predicted_log_volatility = float(np.clip(predicted_log_volatility, -30.0, 10.0))
-    forecast = float(np.exp(2.0 * predicted_log_volatility))
+    forecast_log_variance = 2.0 * predicted_log_volatility + log_smearing
+    forecast = float(np.exp(np.clip(forecast_log_variance, -30.0, 10.0)))
     if not math.isfinite(forecast) or forecast <= 0.0:
         raise FloatingPointError("downside-HAR produced an invalid variance forecast")
     return forecast
