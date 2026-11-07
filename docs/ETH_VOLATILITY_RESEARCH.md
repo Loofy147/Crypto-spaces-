@@ -171,6 +171,8 @@ The command writes local JSONL observations and a compact manifest under
 
 ## Current status
 
+The rolling 24-hour backtest now uses a common realized-variance target and expected-variance forecasts. GARCH and GJR-GARCH use analytical conditional-variance recursions; Gaussian EGARCH uses a closed-form normal moment calculation; Student-t EGARCH is interval-only because its exponential recursion has no finite expected variance. HAR and downside-HAR convert log-volatility forecasts back to expected variance with a Duan smearing factor estimated on training residuals only.
+
 The model module, public provider adapters, local ingestion CLI, canonical data
 contract and deterministic fixture tests are implemented in the repository.
 The provider endpoints have not yet been executed from this environment. This
