@@ -25,6 +25,7 @@ class HorizonPriceInterval:
     upper_price: float
     horizon_steps: int
     simulations: int
+    expected_cumulative_variance: float
     conditional_volatility: float
     annualized_volatility: float
     mean_log_return: float
@@ -128,6 +129,9 @@ def forecast_price_interval_horizon(
     # A few extreme paths can dominate the arithmetic mean under heavy-tailed
     # innovations (especially for EGARCH). The median path standard deviation
     # is a more stable "typical move" summary; price quantiles still retain tails.
+    expected_cumulative_variance = float(np.mean(cumulative_variance_pct2) / 10_000.0)
+    if not np.isfinite(expected_cumulative_variance) or expected_cumulative_variance <= 0.0:
+        raise FloatingPointError("expected cumulative variance is invalid")
     horizon_volatility = float(
         np.median(np.sqrt(cumulative_variance_pct2 / 10_000.0))
     )
@@ -143,6 +147,7 @@ def forecast_price_interval_horizon(
         upper_price=float(upper),
         horizon_steps=horizon_steps,
         simulations=simulations,
+        expected_cumulative_variance=expected_cumulative_variance,
         conditional_volatility=horizon_volatility,
         annualized_volatility=annualized_volatility,
         mean_log_return=mu * horizon_steps / 100.0,
