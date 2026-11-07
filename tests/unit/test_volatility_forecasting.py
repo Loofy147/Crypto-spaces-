@@ -51,6 +51,8 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     assert interval.annualized_volatility > interval.conditional_volatility
     assert horizon.lower_price < horizon.median_price < horizon.upper_price
     assert horizon.horizon_steps == 24
+    assert np.isfinite(horizon.expected_cumulative_variance)
+    assert horizon.expected_cumulative_variance > 0.0
     assert horizon.simulations == 4_000
     assert horizon.conditional_volatility > 0.0
     assert horizon.conditional_volatility < 1.0
