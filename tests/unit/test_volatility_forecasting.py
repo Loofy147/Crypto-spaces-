@@ -51,12 +51,27 @@ def test_arch_family_fits_and_generates_ordered_price_ranges(model: str) -> None
     assert interval.annualized_volatility > interval.conditional_volatility
     assert horizon.lower_price < horizon.median_price < horizon.upper_price
     assert horizon.horizon_steps == 24
-    assert np.isfinite(horizon.expected_cumulative_variance)
-    assert horizon.expected_cumulative_variance > 0.0
+    if model == "EGARCH":
+        assert horizon.expected_cumulative_variance is None
+    else:
+        assert np.isfinite(horizon.expected_cumulative_variance)
+        assert horizon.expected_cumulative_variance > 0.0
     assert horizon.simulations == 4_000
     assert horizon.conditional_volatility > 0.0
     assert horizon.conditional_volatility < 1.0
     assert horizon.annualized_volatility > horizon.conditional_volatility
+
+
+def test_egarch_normal_horizon_has_finite_expected_variance() -> None:
+    fitted = fit_volatility_model(
+        clustered_returns(), model="EGARCH", distribution="normal"
+    )
+    horizon = forecast_price_interval_horizon(
+        fitted, 2_000.0, simulations=2_000, random_seed=101
+    )
+    assert horizon.expected_cumulative_variance is not None
+    assert np.isfinite(horizon.expected_cumulative_variance)
+    assert horizon.expected_cumulative_variance > 0.0
 
 
 def test_horizon_simulation_is_reproducible() -> None:
