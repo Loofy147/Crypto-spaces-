@@ -119,6 +119,12 @@ def forecast_price_interval_horizon(
             raise FloatingPointError("simulated variance path became invalid")
         variance_pct2 = next_variance
 
+    prices = spot_price * np.exp(np.clip(cumulative_log_returns, -50.0, 50.0))
+    if not np.all(np.isfinite(prices)):
+        raise FloatingPointError("simulated prices are not finite")
+    tail = (1.0 - confidence) / 2.0
+    lower, median, upper = np.quantile(prices, [tail, 0.5, 1.0 - tail])
+
     # Expected cumulative variance is calculated analytically wherever the
     # innovation distribution admits the required moments. This avoids noisy
     # Monte Carlo sample means under heavy-tailed Student-t innovations.
