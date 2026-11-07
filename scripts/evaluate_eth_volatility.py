@@ -170,8 +170,10 @@ def _dm_qlike(
     long_run_variance = max(long_run_variance, 0.0)
     standard_error = math.sqrt(long_run_variance / count) if count else float("nan")
     if not math.isfinite(standard_error) or standard_error <= 1e-15:
-        statistic = 0.0 if abs(mean_difference) <= 1e-15 else math.copysign(float("inf"), mean_difference)
-        p_value = 1.0 if not math.isfinite(statistic) else 0.0
+        if abs(mean_difference) <= 1e-15:
+            statistic, p_value = 0.0, 1.0
+        else:
+            statistic, p_value = math.copysign(1e12, mean_difference), 0.0
     else:
         statistic = mean_difference / standard_error
         p_value = float(2.0 * student_t.sf(abs(statistic), df=max(count - 1, 1)))
