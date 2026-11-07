@@ -11,7 +11,7 @@ from typing import Literal, Mapping, Sequence
 
 import numpy as np
 from scipy.optimize import minimize
-from scipy.special import gammaln
+from scipy.special import gammaln, logsumexp
 from scipy.stats import norm, t
 
 VolatilityModel = Literal["GARCH", "EGARCH", "GJR-GARCH"]
@@ -352,9 +352,16 @@ def har_rv_forecast(
     coefficients, _, _, _ = np.linalg.lstsq(x, y, rcond=None)
     residuals = y - x @ coefficients
     latest = np.array([1.0, log_vol[-1], np.mean(log_vol[-5:]), np.mean(log_vol[-22:])])
-    forecast_vol = float(np.exp(np.clip(float(latest @ coefficients), -30.0, 10.0)))
+    predicted_log_volatility = float(latest @ coefficients)
+    # Duan smearing correction converts the log-volatility centre into an
+    # expected variance forecast. The smearing factor uses training residuals
+    # only, so no future target information enters the variance forecast.
+    log_smearing = float(logsumexp(2.0 * residuals) - np.log(residuals.size))
+    forecast_log_variance = predicted_log_volatility * 2.0 + log_smearing
+    forecast_variance = float(np.exp(np.clip(forecast_log_variance, -30.0, 10.0)))
+    forecast_vol = float(np.sqrt(forecast_variance))
     return HARForecast(
-        forecast_volatility=forecast_vol, forecast_variance=forecast_vol**2,
+        forecast_volatility=forecast_vol, forecast_variance=forecast_variance,
         coefficients=tuple(float(v) for v in coefficients), observations=int(y.size),
         residual_rmse=float(np.sqrt(np.mean(residuals**2))),
     )
