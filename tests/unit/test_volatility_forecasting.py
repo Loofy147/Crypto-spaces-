@@ -91,6 +91,32 @@ def test_egarch_normal_horizon_has_finite_expected_variance() -> None:
     assert horizon.expected_cumulative_variance > 0.0
 
 
+def test_egarch_normal_expected_variance_matches_closed_form_two_step() -> None:
+    from scipy.special import ndtr
+
+    fitted = fit_volatility_model(
+        clustered_returns(), model="EGARCH", distribution="normal"
+    )
+    p = fitted.parameters
+    initial = next_period_variance(fitted) * 10_000.0
+    expected_abs = np.sqrt(2.0 / np.pi)
+    plus = p["alpha"] + p["gamma"]
+    minus = p["alpha"] - p["gamma"]
+    innovation_moment = np.exp(-p["alpha"] * expected_abs) * (
+        np.exp(0.5 * plus**2) * ndtr(plus)
+        + np.exp(0.5 * minus**2) * ndtr(minus)
+    )
+    second = np.exp(p["omega"]) * initial**p["beta"] * innovation_moment
+    expected_two_step = (initial + second) / 10_000.0
+
+    horizon = forecast_price_interval_horizon(
+        fitted, 2_000.0, horizon_steps=2, simulations=2_000, random_seed=103
+    )
+    assert horizon.expected_cumulative_variance == pytest.approx(
+        expected_two_step, rel=1e-12
+    )
+
+
 def test_horizon_simulation_is_reproducible() -> None:
     fitted = fit_volatility_model(clustered_returns(), model="GARCH")
     first = forecast_price_interval_horizon(
