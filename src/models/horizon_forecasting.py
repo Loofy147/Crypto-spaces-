@@ -118,6 +118,28 @@ def forecast_price_interval_horizon(
             raise FloatingPointError("simulated variance path became invalid")
         variance_pct2 = next_variance
 
+    # GARCH and GJR-GARCH have linear conditional-variance recursions.
+    # Their expected cumulative variance is available analytically and avoids
+    # the very noisy Monte Carlo sample mean under heavy-tailed Student-t shocks.
+    # The standardized Student-t and Gaussian innovations are symmetric with
+    # unit variance, so E[z^2 1(z < 0)] = 1/2 for the GJR threshold term.
+    analytic_cumulative_variance: float | None = None
+    if fit.model in ("GARCH", "GJR-GARCH"):
+        expected_variance_pct2 = next_period_variance(fit) * 10_000.0
+        total_expected_variance_pct2 = 0.0
+        for _ in range(horizon_steps):
+            total_expected_variance_pct2 += expected_variance_pct2
+            if fit.model == "GARCH":
+                persistence = parameters["alpha"] + parameters["beta"]
+            else:
+                persistence = (
+                    parameters["alpha"] + 0.5 * parameters["gamma"] + parameters["beta"]
+                )
+            expected_variance_pct2 = parameters["omega"] + persistence * expected_variance_pct2
+            if not np.isfinite(expected_variance_pct2) or expected_variance_pct2 <= 0.0:
+                raise FloatingPointError("analytic expected variance recursion became invalid")
+        analytic_cumulative_variance = total_expected_variance_pct2 / 10_000.0
+
     prices = spot_price * np.exp(np.clip(cumulative_log_returns, -50.0, 50.0))
     if not np.all(np.isfinite(prices)):
         raise FloatingPointError("simulated prices are not finite")
@@ -134,7 +156,9 @@ def forecast_price_interval_horizon(
     # so the expected future variance is not finite under Student-t shocks.
     # Keep path quantiles and the median typical-move summary, but do not expose
     # the Monte Carlo sample mean as an expected variance for this combination.
-    if fit.model == "EGARCH" and fit.distribution == "student_t" and (
+    if analytic_cumulative_variance is not None:
+        expected_cumulative_variance = analytic_cumulative_variance
+    elif fit.model == "EGARCH" and fit.distribution == "student_t" and (
         abs(parameters["alpha"]) > 1e-12 or abs(parameters["gamma"]) > 1e-12
     ):
         expected_cumulative_variance = None
