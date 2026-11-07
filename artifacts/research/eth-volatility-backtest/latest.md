@@ -1,6 +1,6 @@
 # ETH/USD rolling 24-hour volatility backtest
 
-**Generated:** 2026-11-07T01:20:43.216506Z
+**Generated:** 2026-11-07T01:26:34.168059Z
 **Data:** coinbase ETH-USD 1h candles (3000 finalized candles)
 **OOS origins:** 30 daily origins, 90-day rolling training window
 
@@ -8,10 +8,10 @@
 
 | Rank | Candidate | QLIKE ↓ | RMSE ↓ | MAE ↓ | Forecast / realized ratio |
 |---:|---|---:|---:|---:|---:|
-| 1 | EGARCH-normal | 0.465613 | 0.00068903 | 0.00061052 | 3.143 |
-| 2 | Rolling-RV-22d | 0.481460 | 0.00064791 | 0.00044872 | 2.041 |
-| 3 | HAR-RV | 0.500931 | 0.00064692 | 0.00041561 | 1.440 |
-| 4 | HAR-RV+downside | 0.582922 | 0.00066514 | 0.00042223 | 1.209 |
+| 1 | HAR-RV+downside | 0.367117 | 0.00059082 | 0.00040619 | 1.834 |
+| 2 | HAR-RV | 0.380140 | 0.00059849 | 0.00044754 | 2.260 |
+| 3 | EGARCH-normal | 0.465613 | 0.00068903 | 0.00061052 | 3.143 |
+| 4 | Rolling-RV-22d | 0.481460 | 0.00064791 | 0.00044872 | 2.041 |
 | 5 | EWMA-hourly | 0.701552 | 0.00085897 | 0.00060191 | 2.906 |
 | 6 | GARCH | 0.720856 | 0.00142398 | 0.00115079 | 5.613 |
 | 7 | GJR-GARCH | 0.720856 | 0.00142398 | 0.00115079 | 5.613 |
@@ -20,12 +20,12 @@
 
 | Candidate | Mean QLIKE difference vs GARCH | DM statistic | p-value | Holm adjusted p |
 |---|---:|---:|---:|---:|
-| EGARCH-normal | -0.255243 | -4.550 | 0.0001 | 0.0005 |
-| GJR-GARCH | 0.000000 | 0.188 | 0.8521 | 1.0000 |
-| HAR-RV | -0.219925 | -2.108 | 0.0438 | 0.2060 |
-| HAR-RV+downside | -0.137934 | -1.159 | 0.2558 | 0.7675 |
-| EWMA-hourly | -0.019304 | -0.149 | 0.8827 | 1.0000 |
-| Rolling-RV-22d | -0.239396 | -2.137 | 0.0412 | 0.2060 |
+| EGARCH-normal | -0.255243 | -4.550 | 0.0001 | 0.0004 |
+| GJR-GARCH | 0.000000 | 1.073 | 0.2921 | 0.5842 |
+| HAR-RV | -0.340716 | -5.274 | 0.0000 | 0.0001 |
+| HAR-RV+downside | -0.353738 | -4.856 | 0.0000 | 0.0002 |
+| EWMA-hourly | -0.019304 | -0.149 | 0.8827 | 0.8827 |
+| Rolling-RV-22d | -0.239395 | -2.137 | 0.0412 | 0.1236 |
 
 Negative mean QLIKE difference means the candidate had lower average loss than GARCH. The p-values are exploratory because the holdout is short and only one venue is tested.
 
@@ -48,6 +48,6 @@ Negative mean QLIKE difference means the candidate had lower average loss than G
 - The daily origins have non-overlapping 24-hour targets; the DM tests still use a five-day Newey-West HAC estimator.
 - A model should not be promoted from this short sample without a longer holdout, regime analysis and repeatable results.
 - Skipped origins: 0.
-- Source response SHA-256: 48598e6be5eee8a1872754e0692e496a89de17f60b628c3959c1f06b7f5b57f3.
+- Source response SHA-256: cba2a2a8936472b18b8172967ac4443ad77f75c2da0bd5856ea562fee329d355.
 
 The comparison does not establish a winning model. Any promotion requires a longer holdout, more than one venue, regime-specific analysis and interval calibration.
