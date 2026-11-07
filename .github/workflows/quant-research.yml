@@ -31,7 +31,7 @@ jobs:
           python -m pytest -q \
             tests/unit/test_volatility_forecasting.py \
             tests/unit/test_market_data_providers.py \
-            tests/unit/test_volatility_snapshot.py
+            tests/unit/test_volatility_snapshot.py \\\n            tests/unit/test_volatility_backtest.py
       - name: Verify API and worker imports
         run: |
           python -c "from src.api.app import app; assert app.title == 'ETH Volatility Intelligence API'"
