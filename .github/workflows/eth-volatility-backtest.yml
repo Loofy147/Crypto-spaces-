@@ -1,0 +1,118 @@
+name: ETH volatility rolling backtest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feat/eth-volatility-forecasting
+    paths:
+      - ".github/workflows/eth-volatility-backtest.yml"
+      - "scripts/evaluate_eth_volatility.py"
+      - "scripts/run_volatility_cycle.py"
+      - "src/models/horizon_forecasting.py"
+      - "src/models/volatility_forecasting.py"
+      - "src/data/market_data_providers.py"
+      - "src/data/ohlcv_contract.py"
+      - "tests/unit/test_volatility_backtest.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: eth-volatility-backtest
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out research source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # actions/checkout v5
+        with:
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # actions/setup-python v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.26,<3" "scipy>=1.12,<2" "pytest>=8" "pytest-cov>=4.1"
+
+      - name: Run deterministic backtest-helper tests
+        run: |
+          python -m pytest -q tests/unit/test_volatility_backtest.py
+          python -m compileall -q src scripts
+
+      - name: Run 30-origin rolling 24-hour backtest
+        run: |
+          python scripts/evaluate_eth_volatility.py \
+            --history-days 125 \
+            --train-window-days 90 \
+            --test-days 30 \
+            --simulations 2000
+
+      - name: Validate experiment report
+        run: |
+          python - <<'PY'
+          import json
+          import math
+          from pathlib import Path
+
+          path = Path("artifacts/research/eth-volatility-backtest/latest.json")
+          report = json.loads(path.read_text(encoding="utf-8"))
+          assert report["experiment"] == "eth_usd_rolling_24h_realized_variance"
+          assert report["design"]["completed_test_origins"] >= 20
+          assert report["data"]["series_audit"]["structurally_valid"] is True
+          assert len(report["scorecard"]) == 7
+          for name, metrics in report["scorecard"].items():
+              assert all(
+                  math.isfinite(metrics[key])
+                  for key in ("qlike", "rmse", "mae", "mean_forecast_to_realized_ratio")
+              ), name
+              assert metrics["rank_by_qlike"] >= 1
+          print(
+              "Validated",
+              report["design"]["completed_test_origins"],
+              "common forecast origins across",
+              len(report["scorecard"]),
+              "candidates."
+          )
+          PY
+
+      - name: Publish reproducible report to the research branch
+        env:
+          BRANCH_NAME: feat/eth-volatility-forecasting
+        run: |
+          mkdir -p /tmp/eth-volatility-backtest
+          cp artifacts/research/eth-volatility-backtest/latest.json /tmp/eth-volatility-backtest/latest.json
+          cp artifacts/research/eth-volatility-backtest/latest.md /tmp/eth-volatility-backtest/latest.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin "$BRANCH_NAME"
+            git reset --hard FETCH_HEAD
+            mkdir -p artifacts/research/eth-volatility-backtest
+            cp /tmp/eth-volatility-backtest/latest.json artifacts/research/eth-volatility-backtest/latest.json
+            cp /tmp/eth-volatility-backtest/latest.md artifacts/research/eth-volatility-backtest/latest.md
+            git add artifacts/research/eth-volatility-backtest/latest.json artifacts/research/eth-volatility-backtest/latest.md
+            if git diff --cached --quiet; then
+              echo "The report is unchanged; nothing to publish."
+              exit 0
+            fi
+            git commit -m "research: publish rolling ETH volatility backtest"
+            if git push origin "HEAD:$BRANCH_NAME"; then
+              echo "Published rolling backtest report."
+              exit 0
+            fi
+            echo "Branch moved during publication; retrying."
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not publish the report after three attempts." >&2
+          exit 1

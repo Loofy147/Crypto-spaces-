@@ -1,0 +1,112 @@
+name: ETH/USD hourly volatility snapshot
+
+on:
+  push:
+    branches:
+      - feat/eth-volatility-forecasting
+    paths:
+      - ".github/workflows/eth-volatility-snapshot.yml"
+      - "scripts/export_volatility_snapshot.py"
+      - "scripts/run_volatility_cycle.py"
+      - "src/volatility_snapshot.py"
+      - "src/models/horizon_forecasting.py"
+      - "src/models/volatility_forecasting.py"
+      - "src/data/**"
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: eth-volatility-snapshot-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install forecasting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-quant.txt
+      - name: Fetch market data and fit volatility models
+        run: python scripts/export_volatility_snapshot.py --output-dir artifacts/volatility
+      - name: Publish snapshot with concurrent-push recovery
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          mkdir -p /tmp/generated-volatility
+          cp artifacts/volatility/latest.json /tmp/generated-volatility/latest.json
+          cp artifacts/volatility/history.jsonl /tmp/generated-volatility/history.jsonl
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch origin "$BRANCH_NAME"
+            git reset --hard FETCH_HEAD
+            mkdir -p artifacts/volatility
+            cp /tmp/generated-volatility/latest.json artifacts/volatility/latest.json
+            python - <<'PY'
+          import json
+          from datetime import datetime
+          from pathlib import Path
+
+          current_history = Path("artifacts/volatility/history.jsonl")
+          generated_history = Path("/tmp/generated-volatility/history.jsonl")
+          rows_by_timestamp = {}
+
+          for path in (current_history, generated_history):
+              if not path.exists():
+                  continue
+              for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+                  if not line.strip():
+                      continue
+                  row = json.loads(line)
+                  timestamp = row.get("generated_at")
+                  if not isinstance(timestamp, str):
+                      raise ValueError(f"history row {line_number} has no timestamp")
+                  rows_by_timestamp[timestamp] = row
+
+          latest = json.loads(Path("artifacts/volatility/latest.json").read_text())
+          rows_by_timestamp[latest["generated_at"]] = latest
+          ordered = sorted(
+              rows_by_timestamp.values(),
+              key=lambda row: datetime.fromisoformat(
+                  row["generated_at"].replace("Z", "+00:00")
+              ),
+          )[-720:]
+          current_history.write_text(
+              "".join(
+                  json.dumps(row, sort_keys=True, separators=(",", ":"), allow_nan=False) + chr(10)
+                  for row in ordered
+              )
+          )
+          PY
+            git add artifacts/volatility/latest.json artifacts/volatility/history.jsonl
+            if git diff --cached --quiet; then
+              echo "Snapshot is unchanged; nothing to publish."
+              exit 0
+            fi
+            git commit -m "chore(data): refresh ETH/USD volatility snapshot"
+            if git push origin "HEAD:$BRANCH_NAME"; then
+              echo "Published snapshot after $attempt attempt(s)."
+              exit 0
+            fi
+            echo "Branch moved during publication; retrying from its latest commit."
+            sleep $((attempt * 2))
+          done
+
+          echo "Could not publish the snapshot after three attempts." >&2
+          exit 1
