@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.special import log_ndtr
 
 from .volatility_forecasting import (
     VolatilityModelFit,
@@ -118,54 +119,85 @@ def forecast_price_interval_horizon(
             raise FloatingPointError("simulated variance path became invalid")
         variance_pct2 = next_variance
 
-    # GARCH and GJR-GARCH have linear conditional-variance recursions.
-    # Their expected cumulative variance is available analytically and avoids
-    # the very noisy Monte Carlo sample mean under heavy-tailed Student-t shocks.
-    # The standardized Student-t and Gaussian innovations are symmetric with
-    # unit variance, so E[z^2 1(z < 0)] = 1/2 for the GJR threshold term.
-    analytic_cumulative_variance: float | None = None
+    # Expected cumulative variance is calculated analytically wherever the
+    # innovation distribution admits the required moments. This avoids noisy
+    # Monte Carlo sample means under heavy-tailed Student-t innovations.
+    expected_cumulative_variance: float | None = None
     if fit.model in ("GARCH", "GJR-GARCH"):
+        # For symmetric unit-variance innovations, E[z^2 1(z < 0)] = 1/2.
+        # The GARCH/GJR conditional-variance expectation therefore follows a
+        # linear recursion once the first future variance is conditioned on.
         expected_variance_pct2 = next_period_variance(fit) * 10_000.0
         total_expected_variance_pct2 = 0.0
+        if fit.model == "GARCH":
+            persistence = parameters["alpha"] + parameters["beta"]
+        else:
+            persistence = (
+                parameters["alpha"] + 0.5 * parameters["gamma"] + parameters["beta"]
+            )
         for _ in range(horizon_steps):
             total_expected_variance_pct2 += expected_variance_pct2
-            if fit.model == "GARCH":
-                persistence = parameters["alpha"] + parameters["beta"]
-            else:
-                persistence = (
-                    parameters["alpha"] + 0.5 * parameters["gamma"] + parameters["beta"]
-                )
             expected_variance_pct2 = parameters["omega"] + persistence * expected_variance_pct2
             if not np.isfinite(expected_variance_pct2) or expected_variance_pct2 <= 0.0:
                 raise FloatingPointError("analytic expected variance recursion became invalid")
-        analytic_cumulative_variance = total_expected_variance_pct2 / 10_000.0
+        expected_cumulative_variance = total_expected_variance_pct2 / 10_000.0
 
-    prices = spot_price * np.exp(np.clip(cumulative_log_returns, -50.0, 50.0))
-    if not np.all(np.isfinite(prices)):
-        raise FloatingPointError("simulated prices are not finite")
+    elif fit.model == "EGARCH" and fit.distribution == "normal":
+        # EGARCH has log h[t+1] = omega + beta log h[t] + w[t],
+        # with w = alpha(|z|-E|z|) + gamma*z. Under Gaussian z, the
+        # moment-generating function of w is finite and has a closed form.
+        # The log-MGF is evaluated stably via log_ndtr/logaddexp.
+        alpha = float(parameters["alpha"])
+        beta = float(parameters["beta"])
+        gamma = float(parameters["gamma"])
+        omega = float(parameters["omega"])
+        expected_abs = float(np.sqrt(2.0 / np.pi))
+        initial_log_variance = float(np.log(next_period_variance(fit) * 10_000.0))
+        beta_power = 1.0
+        omega_sum = 0.0
+        log_mgf_sum = 0.0
+        total_expected_variance_pct2 = 0.0
+        for step in range(horizon_steps):
+            log_expected_variance = (
+                beta_power * initial_log_variance + omega_sum + log_mgf_sum
+            )
+            if log_expected_variance > np.log(np.finfo(np.float64).max) - 2.0:
+                raise FloatingPointError("analytic EGARCH expected variance overflowed")
+            expected_variance_pct2 = float(np.exp(log_expected_variance))
+            if not np.isfinite(expected_variance_pct2) or expected_variance_pct2 <= 0.0:
+                raise FloatingPointError("analytic EGARCH expected variance is invalid")
+            total_expected_variance_pct2 += expected_variance_pct2
 
-    tail = (1.0 - confidence) / 2.0
-    lower, median, upper = np.quantile(
-        prices, [tail, 0.5, 1.0 - tail]
-    )
-    # A few extreme paths can dominate the arithmetic mean under heavy-tailed
-    # innovations (especially for EGARCH). The median path standard deviation
-    # is a more stable "typical move" summary; price quantiles still retain tails.
-    # A Student-t innovation has no finite moment-generating function. In
-    # EGARCH, non-zero asymmetry terms enter an exponential variance recursion,
-    # so the expected future variance is not finite under Student-t shocks.
-    # Keep path quantiles and the median typical-move summary, but do not expose
-    # the Monte Carlo sample mean as an expected variance for this combination.
-    if analytic_cumulative_variance is not None:
-        expected_cumulative_variance = analytic_cumulative_variance
+            plus = beta_power * (alpha + gamma)
+            minus = beta_power * (alpha - gamma)
+            log_mgf_plus = 0.5 * plus**2 + float(log_ndtr(plus))
+            log_mgf_minus = 0.5 * minus**2 + float(log_ndtr(minus))
+            log_mgf = (
+                -beta_power * alpha * expected_abs
+                + float(np.logaddexp(log_mgf_plus, log_mgf_minus))
+            )
+            log_mgf_sum += log_mgf
+            omega_sum += omega * beta_power
+            beta_power *= beta
+
+        expected_cumulative_variance = total_expected_variance_pct2 / 10_000.0
+
     elif fit.model == "EGARCH" and fit.distribution == "student_t" and (
         abs(parameters["alpha"]) > 1e-12 or abs(parameters["gamma"]) > 1e-12
     ):
+        # A Student-t variable has no finite MGF. With non-zero EGARCH
+        # asymmetry terms the expected exponential variance is undefined.
         expected_cumulative_variance = None
     else:
+        # This is the deterministic special case where EGARCH's innovation
+        # term is zero; the path recursion is consequently non-random.
         expected_cumulative_variance = float(np.mean(cumulative_variance_pct2) / 10_000.0)
-        if not np.isfinite(expected_cumulative_variance) or expected_cumulative_variance <= 0.0:
-            raise FloatingPointError("expected cumulative variance is invalid")
+
+    if expected_cumulative_variance is not None and (
+        not np.isfinite(expected_cumulative_variance) or expected_cumulative_variance <= 0.0
+    ):
+        raise FloatingPointError("expected cumulative variance is invalid")
+
     horizon_volatility = float(
         np.median(np.sqrt(cumulative_variance_pct2 / 10_000.0))
     )
